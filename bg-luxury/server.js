@@ -4,13 +4,19 @@ const path = require('path');
 const express = require('express');
 const fleet = require('./data/fleet');
 const store = require('./data/store');
+const { rentalPrice, daysBetween } = require('./public/pricing');
 
 const PORT = Number(process.env.PORT) || 3000;
 const SITE_URL = (process.env.SITE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
-const CURRENCY = (process.env.CURRENCY || 'usd').toLowerCase();
+const CURRENCY = (process.env.CURRENCY || 'gbp').toLowerCase();
 const DEPOSIT_PERCENT = Number(process.env.DEPOSIT_PERCENT) || 25;
-const SECURITY_DEPOSIT = Number(process.env.SECURITY_DEPOSIT) || 1000;
 const MAX_RENTAL_DAYS = 30;
+const CONTACT = {
+  phone: process.env.CONTACT_PHONE || '+44 0000 000000',
+  whatsapp: (process.env.CONTACT_WHATSAPP || '440000000000').replace(/\D/g, ''),
+  email: process.env.CONTACT_EMAIL || 'info@example.com',
+  instagram: process.env.CONTACT_INSTAGRAM || 'https://instagram.com/'
+};
 
 const stripe = process.env.STRIPE_SECRET_KEY ? require('stripe')(process.env.STRIPE_SECRET_KEY) : null;
 const app = express();
@@ -42,21 +48,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const clean = (v, max = 200) => String(v ?? '').trim().slice(0, max);
 
-function rentalDays(pickup, dropoff) {
-  const start = new Date(`${pickup}T00:00:00Z`);
-  const end = new Date(`${dropoff}T00:00:00Z`);
-  if (isNaN(start) || isNaN(end)) return null;
-  return Math.round((end - start) / 86400000);
-}
-
-function quote(car, days) {
-  const total = car.dailyRate * days;
-  const deposit = Math.round((total * DEPOSIT_PERCENT) / 100);
-  return { days, dailyRate: car.dailyRate, total, deposit };
-}
-
 app.get('/api/config', (req, res) => {
-  res.json({ currency: CURRENCY, depositPercent: DEPOSIT_PERCENT, securityDeposit: SECURITY_DEPOSIT, paymentsEnabled: Boolean(stripe) });
+  res.json({ currency: CURRENCY, depositPercent: DEPOSIT_PERCENT, paymentsEnabled: Boolean(stripe), contact: CONTACT });
 });
 
 app.get('/api/fleet', (req, res) => res.json(fleet));
@@ -70,11 +63,13 @@ app.post('/api/inquiries', (req, res) => {
     email: clean(b.email, 150),
     phone: clean(b.phone, 40),
     topic: clean(b.topic, 60),
+    carId: clean(b.carId, 40),
+    date: clean(b.date, 10),
     message: clean(b.message, 2000),
     createdAt: new Date().toISOString()
   };
-  if (!inquiry.name || !EMAIL_RE.test(inquiry.email) || !inquiry.message) {
-    return res.status(400).json({ error: 'Please include your name, a valid email and a message.' });
+  if (!inquiry.name || !EMAIL_RE.test(inquiry.email) || !inquiry.phone || !inquiry.message) {
+    return res.status(400).json({ error: 'Please include your name, a valid email, your phone number and a message.' });
   }
   store.insert('inquiries', inquiry);
   res.json({ ok: true });
@@ -86,13 +81,14 @@ app.post('/api/bookings', async (req, res) => {
 
   const car = fleet.find((c) => c.id === b.carId);
   if (!car) return res.status(400).json({ error: 'Please choose a vehicle.' });
+  if (!car.dailyRate) return res.status(400).json({ error: `The ${car.name} is price on request. Please send an enquiry instead.` });
 
   // Customers pick dates in their own timezone, so allow "today" anywhere in the world (UTC minus one day).
   const earliest = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-  const days = rentalDays(b.pickupDate, b.dropoffDate);
+  const days = daysBetween(b.pickupDate, b.dropoffDate);
   if (!days || b.pickupDate < earliest) return res.status(400).json({ error: 'Please choose valid pickup and return dates.' });
   if (days < 1 || days > MAX_RENTAL_DAYS) {
-    return res.status(400).json({ error: `Rentals run from 1 to ${MAX_RENTAL_DAYS} days.` });
+    return res.status(400).json({ error: `Online bookings run from 1 to ${MAX_RENTAL_DAYS} days. Enquire for longer hires.` });
   }
 
   const name = clean(b.name, 100);
@@ -101,13 +97,14 @@ app.post('/api/bookings', async (req, res) => {
   if (!name || !EMAIL_RE.test(email) || !phone) {
     return res.status(400).json({ error: 'Please include your name, email and phone number.' });
   }
-  if (!b.over25 || !b.agreeTerms) {
-    return res.status(400).json({ error: 'Please confirm the age requirement and accept the rental terms.' });
+  if (!b.meetsRequirements || !b.agreeTerms) {
+    return res.status(400).json({ error: 'Please confirm you meet the requirements and accept the terms.' });
   }
 
-  const q = quote(car, days);
+  const total = rentalPrice(car, days);
+  const deposit = Math.round((total * DEPOSIT_PERCENT) / 100);
   const payInFull = b.paymentOption === 'full';
-  const amountDue = payInFull ? q.total : q.deposit;
+  const amountDue = payInFull ? total : deposit;
 
   const booking = store.insert('bookings', {
     id: crypto.randomUUID(),
@@ -121,7 +118,9 @@ app.post('/api/bookings', async (req, res) => {
     email,
     phone,
     notes: clean(b.notes, 1000),
-    ...q,
+    days,
+    total,
+    deposit,
     paymentOption: payInFull ? 'full' : 'deposit',
     amountDue,
     status: 'pending_payment',
@@ -143,7 +142,7 @@ app.post('/api/bookings', async (req, res) => {
             currency: CURRENCY,
             unit_amount: Math.round(amountDue * 100),
             product_data: {
-              name: `${car.name}: ${payInFull ? 'rental' : `${DEPOSIT_PERCENT}% reservation deposit`}`,
+              name: `${car.name}: ${payInFull ? 'self-drive hire' : `${DEPOSIT_PERCENT}% reservation deposit`}`,
               description: `${b.pickupDate} to ${b.dropoffDate} (${days} day${days === 1 ? '' : 's'})`
             }
           }
@@ -169,5 +168,5 @@ app.get('/api/bookings/:id', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`BG Luxury running at ${SITE_URL}${stripe ? '' : ' (demo mode: no STRIPE_SECRET_KEY, payments are simulated)'}`);
+  console.log(`BG LUX running at ${SITE_URL}${stripe ? '' : ' (demo mode: no STRIPE_SECRET_KEY, payments are simulated)'}`);
 });

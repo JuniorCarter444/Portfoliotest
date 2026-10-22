@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BG Luxury Cars | Exotic &amp; Luxury Car Rentals</title>
+  <meta name="description" content="Rent exotic and luxury cars. Reserve online, pay securely and get your car delivered to your door.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b0b0d'/%3E%3Ctext x='16' y='22' font-family='Georgia' font-size='15' fill='%23c9a45c' text-anchor='middle'%3EBG%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="nav" id="top">
+    <a href="#top" class="brand">BG <span>Luxury</span></a>
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">&#9776;</button>
+    <nav class="nav-links">
+      <a href="#fleet">Fleet</a>
+      <a href="#how">How it works</a>
+      <a href="#services">Services</a>
+      <a href="#faq">FAQ</a>
+      <a href="#contact">Contact</a>
+      <a href="#book" class="btn btn-gold btn-sm">Book now</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Exotic &amp; luxury rentals</p>
+      <h1>Drive something<br><em>unforgettable.</em></h1>
+      <p class="lead">Lamborghini, Rolls-Royce, Ferrari and more. Reserve online in minutes, pay securely, and have it delivered to your door.</p>
+      <div class="hero-cta">
+        <a href="#book" class="btn btn-gold">Reserve a car</a>
+        <a href="#fleet" class="btn btn-ghost">View the fleet</a>
+      </div>
+      <ul class="hero-stats">
+        <li><strong>24/7</strong><span>Concierge</span></li>
+        <li><strong>Door</strong><span>Delivery</span></li>
+        <li><strong>Secure</strong><span>Online payment</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="fleet" class="section">
+    <div class="section-head">
+      <p class="eyebrow">The collection</p>
+      <h2>Our fleet</h2>
+    </div>
+    <div class="filters" role="tablist" aria-label="Filter by category"></div>
+    <div class="fleet-grid" aria-live="polite"></div>
+  </section>
+
+  <section id="how" class="section section-alt">
+    <div class="section-head">
+      <p class="eyebrow">Simple from start to finish</p>
+      <h2>How it works</h2>
+    </div>
+    <ol class="steps">
+      <li><span>01</span><h3>Choose your car</h3><p>Pick from our hand-selected collection of exotic and luxury vehicles.</p></li>
+      <li><span>02</span><h3>Reserve online</h3><p>Pick your dates, then pay a deposit or the full amount through secure checkout.</p></li>
+      <li><span>03</span><h3>Verify &amp; drive</h3><p>We confirm your licence and insurance, then hand over the keys or deliver the car to you.</p></li>
+    </ol>
+  </section>
+
+  <section id="book" class="section">
+    <div class="section-head">
+      <p class="eyebrow">Reserve</p>
+      <h2>Book your rental</h2>
+    </div>
+    <div class="book-layout">
+      <form id="booking-form" class="card form" novalidate>
+        <div class="grid-2">
+          <label class="full">Vehicle
+            <select name="carId" required></select>
+          </label>
+          <label>Pickup date
+            <input type="date" name="pickupDate" required>
+          </label>
+          <label>Return date
+            <input type="date" name="dropoffDate" required>
+          </label>
+          <label>Pickup time
+            <input type="time" name="pickupTime" value="10:00">
+          </label>
+          <label>Delivery address <small>(optional)</small>
+            <input type="text" name="delivery" placeholder="Leave blank to collect">
+          </label>
+          <label>Full name
+            <input type="text" name="name" autocomplete="name" required>
+          </label>
+          <label>Phone
+            <input type="tel" name="phone" autocomplete="tel" required>
+          </label>
+          <label class="full">Email
+            <input type="email" name="email" autocomplete="email" required>
+          </label>
+          <label class="full">Notes <small>(occasion, special requests)</small>
+            <textarea name="notes" rows="3"></textarea>
+          </label>
+        </div>
+        <input type="text" name="company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+        <fieldset class="pay-options">
+          <legend>Payment</legend>
+          <label class="radio"><input type="radio" name="paymentOption" value="deposit" checked> <span>Pay a <b class="dep-pct">25%</b> deposit now</span></label>
+          <label class="radio"><input type="radio" name="paymentOption" value="full"> <span>Pay in full now</span></label>
+        </fieldset>
+
+        <label class="check"><input type="checkbox" name="over25" required> <span>I am 25 or older and hold a valid driver's licence and full-coverage insurance.</span></label>
+        <label class="check"><input type="checkbox" name="agreeTerms" required> <span>I agree to the <a href="#faq">rental terms</a>, including the refundable security deposit.</span></label>
+
+        <p class="form-msg" role="alert"></p>
+        <button type="submit" class="btn btn-gold btn-block">Continue to secure payment</button>
+        <p class="fine">Payments are processed by Stripe. We never see or store your card details.</p>
+      </form>
+
+      <aside class="card summary" aria-live="polite">
+        <h3>Your quote</h3>
+        <div class="summary-car">Select a vehicle</div>
+        <dl>
+          <div><dt>Daily rate</dt><dd data-q="rate">–</dd></div>
+          <div><dt>Days</dt><dd data-q="days">–</dd></div>
+          <div class="total"><dt>Rental total</dt><dd data-q="total">–</dd></div>
+          <div class="due"><dt>Due today</dt><dd data-q="due">–</dd></div>
+        </dl>
+        <p class="fine">A refundable security hold of <b class="sec-dep">$1,000</b> is placed at pickup. Taxes and mileage overage are billed separately.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section id="services" class="section section-alt">
+    <div class="section-head">
+      <p class="eyebrow">More than a rental</p>
+      <h2>Services</h2>
+    </div>
+    <div class="services">
+      <article class="card"><h3>Door-to-door delivery</h3><p>We deliver to your home, hotel or the airport and collect it when you're done.</p></article>
+      <article class="card"><h3>Chauffeur service</h3><p>Sit back with a professional driver for weddings, proms, nights out and corporate travel.</p></article>
+      <article class="card"><h3>Events &amp; shoots</h3><p>Music videos, photo shoots and brand activations. Ask us about multi-car packages.</p></article>
+    </div>
+  </section>
+
+  <section id="faq" class="section">
+    <div class="section-head">
+      <p class="eyebrow">Good to know</p>
+      <h2>Requirements &amp; FAQ</h2>
+    </div>
+    <div class="faq">
+      <details><summary>What do I need to rent?</summary><p>You must be 25 or older and have a valid driver's licence, full-coverage insurance that transfers to rentals, and a major credit card in your name.</p></details>
+      <details><summary>How does the deposit work?</summary><p>You can reserve with a deposit and pay the balance at pickup, or pay in full online. A separate refundable security hold goes on your card at pickup and is released after the car is returned in the same condition.</p></details>
+      <details><summary>Is there a mileage limit?</summary><p>Each rental includes a daily mileage allowance. Extra miles are billed at the vehicle's overage rate.</p></details>
+      <details><summary>What is your cancellation policy?</summary><p>Cancel more than 72 hours before pickup for a full refund of your deposit. Later cancellations may forfeit the deposit.</p></details>
+      <details><summary>Do you deliver?</summary><p>Yes. Add a delivery address when you book and we'll confirm the delivery fee with you.</p></details>
+    </div>
+  </section>
+
+  <section id="contact" class="section section-alt">
+    <div class="section-head">
+      <p class="eyebrow">Get in touch</p>
+      <h2>Contact us</h2>
+    </div>
+    <div class="contact-layout">
+      <div class="contact-info">
+        <p>Questions, long-term rentals or chauffeur quotes? Send a message and our team will get back to you shortly.</p>
+        <ul>
+          <li><span>Phone</span><a href="tel:+10000000000">(000) 000-0000</a></li>
+          <li><span>Email</span><a href="mailto:info@example.com">info@example.com</a></li>
+          <li><span>Hours</span>Mon–Sun, 9am – 9pm</li>
+          <li><span>Location</span>Your city, State</li>
+        </ul>
+      </div>
+      <form id="contact-form" class="card form" novalidate>
+        <div class="grid-2">
+          <label>Name<input type="text" name="name" autocomplete="name" required></label>
+          <label>Phone<input type="tel" name="phone" autocomplete="tel"></label>
+          <label class="full">Email<input type="email" name="email" autocomplete="email" required></label>
+          <label class="full">Topic
+            <select name="topic">
+              <option>General question</option>
+              <option>Chauffeur service</option>
+              <option>Events &amp; shoots</option>
+              <option>Long-term rental</option>
+            </select>
+          </label>
+          <label class="full">Message<textarea name="message" rows="4" required></textarea></label>
+        </div>
+        <input type="text" name="company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="form-msg" role="alert"></p>
+        <button type="submit" class="btn btn-gold btn-block">Send message</button>
+      </form>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <a href="#top" class="brand">BG <span>Luxury</span></a>
+    <p>&copy; <span id="year"></span> BG Luxury Cars. All rights reserved.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

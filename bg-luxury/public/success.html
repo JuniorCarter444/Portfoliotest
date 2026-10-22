@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Confirmed | BG Luxury Cars</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b0b0d'/%3E%3Ctext x='16' y='22' font-family='Georgia' font-size='15' fill='%23c9a45c' text-anchor='middle'%3EBG%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="result">
+    <div class="card">
+      <p class="eyebrow">Reservation received</p>
+      <h1>Thank you!</h1>
+      <p class="notice" hidden id="demo">Demo mode: no payment was taken. Add your Stripe keys to accept real payments.</p>
+      <p>Your booking is in. We'll contact you shortly to verify your licence and insurance and confirm pickup details.</p>
+      <dl id="details" hidden></dl>
+      <a href="/" class="btn btn-gold">Back to home</a>
+    </div>
+  </main>
+  <script>
+    const params = new URLSearchParams(location.search);
+    if (params.get('demo')) document.getElementById('demo').hidden = false;
+    const id = params.get('booking');
+    if (id) {
+      Promise.all([
+        fetch('/api/config').then((r) => r.json()),
+        fetch(`/api/bookings/${encodeURIComponent(id)}`).then((r) => (r.ok ? r.json() : null))
+      ]).then(([config, b]) => {
+        if (!b) return;
+        const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: config.currency.toUpperCase(), maximumFractionDigits: 0 }).format(n);
+        const rows = [
+          ['Vehicle', b.carName],
+          ['Dates', `${b.pickupDate} → ${b.dropoffDate}`],
+          ['Days', b.days],
+          ['Rental total', fmt(b.total)],
+          [b.paymentOption === 'full' ? 'Paid in full' : 'Deposit', fmt(b.amountDue)]
+        ];
+        const dl = document.getElementById('details');
+        rows.forEach(([k, v]) => {
+          const div = document.createElement('div');
+          div.innerHTML = '<dt></dt><dd></dd>';
+          div.children[0].textContent = k;
+          div.children[1].textContent = v;
+          dl.appendChild(div);
+        });
+        dl.hidden = false;
+      });
+    }
+  </script>
+</body>
+</html>

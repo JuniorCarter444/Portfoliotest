@@ -20,7 +20,7 @@ const SITE_URL = (process.env.SITE_URL || process.env.RENDER_EXTERNAL_URL || `ht
 const CURRENCY = (process.env.CURRENCY || 'gbp').toLowerCase();
 const DEPOSIT_PERCENT = Number(process.env.DEPOSIT_PERCENT) || 25;
 const MAX_RENTAL_DAYS = 30;
-const UPLOAD_DIR = path.join(__dirname, 'data', 'uploads');
+const UPLOAD_DIR = path.join(store.DATA_DIR, 'uploads');
 const CONTACT = {
   phone: process.env.CONTACT_PHONE || '+44 0000 000000',
   whatsapp: (process.env.CONTACT_WHATSAPP || '440000000000').replace(/\D/g, ''),

@@ -2,8 +2,12 @@
 const fs = require('fs');
 const path = require('path');
 
+// Where records are saved. In production point DATA_DIR at a persistent disk (e.g. /var/data on Render).
+const DATA_DIR = process.env.DATA_DIR || __dirname;
+fs.mkdirSync(DATA_DIR, { recursive: true });
+
 function file(name) {
-  return path.join(__dirname, `${name}.json`);
+  return path.join(DATA_DIR, `${name}.json`);
 }
 
 function readAll(name) {
@@ -38,4 +42,4 @@ function find(name, id) {
   return readAll(name).find((r) => r.id === id) || null;
 }
 
-module.exports = { readAll, insert, update, find };
+module.exports = { readAll, insert, update, find, DATA_DIR };

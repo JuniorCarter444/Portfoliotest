@@ -35,16 +35,13 @@ npm start               # http://localhost:3000, admin at http://localhost:3000/
 
 With nothing else configured it runs in **demo mode**: payments are simulated and emails are saved to `data/outbox.json` instead of being sent, so you can click through the whole journey safely.
 
-## Put a demo online (Render)
+## Put it online (Render)
 
-The repository includes a `render.yaml` at its root, so Render can set everything up for you:
+**Full step-by-step guide: [GO-LIVE.md](GO-LIVE.md).**
 
-1. Sign in at [render.com](https://render.com) with GitHub.
-2. Click **New → Blueprint**, choose this repository and the branch with the site on it.
-3. When asked, enter an `ADMIN_PASSWORD`. Leave the Stripe and SMTP fields empty for demo mode.
-4. Click **Apply**. After a few minutes you get a link like `https://bg-lux.onrender.com` (admin at `/admin`).
+The repository includes a `render.yaml` at its root, set up for the live site: Render's Starter plan with a 1 GB persistent disk for bookings and documents (`DATA_DIR=/var/data`). In Render, choose **New → Blueprint**, pick this repository and branch, and fill in the settings it asks for.
 
-The free plan sleeps when unused (the first visit can take about 30 seconds) and wipes saved bookings and uploads when it restarts. That's fine for a demo. For the live site, use a paid plan with a persistent disk (see Storage below).
+For a free throwaway demo instead, change `plan: starter` to `plan: free` in `render.yaml` and delete the `disk:` section. The free plan sleeps when unused and loses saved bookings and uploads when it restarts.
 
 ## Going live: checklist
 
@@ -55,7 +52,7 @@ The free plan sleeps when unused (the first visit can take about 30 seconds) and
 3. **Email**: fill in the `SMTP_*` settings from your email provider and set `MAIL_FROM` and `BUSINESS_EMAIL`. Any provider with SMTP works (Google Workspace, Microsoft 365, Zoho, SendGrid, Resend).
 4. **Admin**: set a long, unique `ADMIN_PASSWORD`.
 5. **Hosting**: this is a Node.js (18+) app, so it needs a host that runs a server (Render, Railway, Fly.io or a VPS), with HTTPS. It won't work on GitHub Pages. Set `SITE_URL` to your web address and `TRUST_PROXY=1` if the host puts a proxy in front.
-6. **Storage**: bookings and documents are saved in the `data/` folder. Use a host with a **persistent disk** (many wipe local files on each deploy), and back it up. For a bigger operation, move to a database and private cloud storage (e.g. S3), which `data/store.js` and the upload code are set up to swap out.
+6. **Storage**: bookings and documents are saved in `DATA_DIR` (default: the `data/` folder). Point it at a **persistent disk** (many hosts wipe local files on each deploy), and back it up. For a bigger operation, move to a database and private cloud storage (e.g. S3), which `data/store.js` and the upload code are set up to swap out.
 
 ## How deposits work, and why
 

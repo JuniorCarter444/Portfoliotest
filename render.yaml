@@ -1,31 +1,60 @@
-# Render Blueprint: deploys the BG LUX site (bg-luxury/) as a web service.
-# In Render: New > Blueprint > pick this repository and branch.
+# Render Blueprint for the live BG LUX site (bg-luxury/).
+# In Render: New > Blueprint > pick this repository and branch. Step-by-step: bg-luxury/GO-LIVE.md
 services:
   - type: web
     name: bg-lux
     runtime: node
-    plan: free
+    # Starter (paid) is needed for the persistent disk below. For a throwaway demo, change to "free" and delete the disk section.
+    plan: starter
+    region: frankfurt
     rootDir: bg-luxury
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/config
+    # Bookings, verifications and uploaded documents are saved here and survive restarts and deploys.
+    disk:
+      name: bg-lux-data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: NODE_VERSION
         value: "20"
-      # Render runs the app behind a proxy, so trust it for the customer IP recorded with terms acceptance
+      - key: DATA_DIR
+        value: /var/data
       - key: TRUST_PROXY
         value: "1"
-      # Password for /admin; Render asks for it when you create the Blueprint
+      - key: CURRENCY
+        value: gbp
+      - key: DEPOSIT_PERCENT
+        value: "25"
+      # Render asks for each of these when you create the Blueprint. See GO-LIVE.md for where to find them.
+      - key: SITE_URL
+        sync: false
       - key: ADMIN_PASSWORD
         sync: false
-      # Leave these empty for demo mode (no real payments or emails). Fill them in to go live; see bg-luxury/README.md.
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
       - key: SMTP_HOST
         sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_SECURE
+        sync: false
       - key: SMTP_USER
         sync: false
       - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: BUSINESS_EMAIL
+        sync: false
+      - key: CONTACT_PHONE
+        sync: false
+      - key: CONTACT_WHATSAPP
+        sync: false
+      - key: CONTACT_EMAIL
+        sync: false
+      - key: CONTACT_INSTAGRAM
         sync: false

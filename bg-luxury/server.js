@@ -15,7 +15,8 @@ const { createPayments } = require('./lib/payments');
 const { createAdminRouter } = require('./lib/admin');
 
 const PORT = Number(process.env.PORT) || 3000;
-const SITE_URL = (process.env.SITE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
+// RENDER_EXTERNAL_URL is set automatically on Render.
+const SITE_URL = (process.env.SITE_URL || process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
 const CURRENCY = (process.env.CURRENCY || 'gbp').toLowerCase();
 const DEPOSIT_PERCENT = Number(process.env.DEPOSIT_PERCENT) || 25;
 const MAX_RENTAL_DAYS = 30;

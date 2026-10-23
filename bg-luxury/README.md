@@ -35,6 +35,17 @@ npm start               # http://localhost:3000, admin at http://localhost:3000/
 
 With nothing else configured it runs in **demo mode**: payments are simulated and emails are saved to `data/outbox.json` instead of being sent, so you can click through the whole journey safely.
 
+## Put a demo online (Render)
+
+The repository includes a `render.yaml` at its root, so Render can set everything up for you:
+
+1. Sign in at [render.com](https://render.com) with GitHub.
+2. Click **New → Blueprint**, choose this repository and the branch with the site on it.
+3. When asked, enter an `ADMIN_PASSWORD`. Leave the Stripe and SMTP fields empty for demo mode.
+4. Click **Apply**. After a few minutes you get a link like `https://bg-lux.onrender.com` (admin at `/admin`).
+
+The free plan sleeps when unused (the first visit can take about 30 seconds) and wipes saved bookings and uploads when it restarts. That's fine for a demo. For the live site, use a paid plan with a persistent disk (see Storage below).
+
 ## Going live: checklist
 
 1. **Contact details**: set `CONTACT_PHONE`, `CONTACT_WHATSAPP`, `CONTACT_EMAIL` and `CONTACT_INSTAGRAM` in `.env`.

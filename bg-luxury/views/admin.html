@@ -108,7 +108,7 @@
           <div class="row"><input type="number" min="0" step="0.01" placeholder="Deduction £ (0 for full refund)" data-f="deduction"></div>
           <div class="row"><input type="text" placeholder="Reason for deduction (emailed to customer)" data-f="reason"><button class="btn btn-outline" data-act="refund">Refund</button></div>`;
       }
-      return `${head}<p class="note">Refunded ${money(d.refundAmount)} on ${day(d.refundedAt)}${d.deduction ? `. Kept ${money(d.deduction)}: ${esc(d.reason)}` : ''}${d.method !== 'card' ? ' (refund this yourself by bank transfer)' : ''}</p>`;
+      return `${head}<p class="note">Refunded ${money(d.refundAmount)} on ${day(d.refundedAt)}${d.deduction ? `. Kept ${money(d.deduction)}: ${esc(d.reason)}` : ''}${['card', 'demo'].includes(d.method) ? '' : ' (refund this yourself by bank transfer)'}</p>`;
     }
 
     function bookingCard(b) {

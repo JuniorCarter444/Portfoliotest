@@ -1,10 +1,10 @@
-const state = { fleet: [], config: { currency: 'gbp', depositPercent: 25, contact: {} }, filter: 'All' };
+const state = { fleet: [], config: { currency: 'gbp', depositPercent: 25, contact: {}, handover: {} }, questions: [], filter: 'All' };
 const CATEGORY_ORDER = ['Supercar', 'Prestige', 'SUV', 'Saloon'];
 const CATEGORY_LABELS = { All: 'All cars', Supercar: 'Supercars', SUV: 'SUVs', Saloon: 'Saloons' };
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const { esc } = BGForms;
 const money = (n) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: state.config.currency.toUpperCase(), maximumFractionDigits: 0 }).format(n);
 // Local calendar date (not UTC) so evening visitors aren't pushed to tomorrow.
 const isoDate = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -13,20 +13,22 @@ const addDays = (iso, n) => {
   return isoDate(new Date(y, m - 1, d + n));
 };
 const bookable = () => state.fleet.filter((c) => c.dailyRate);
+const getJSON = (url) => fetch(url).then((r) => r.json());
 
 async function init() {
   $('#year').textContent = new Date().getFullYear();
   setupNav();
   try {
-    const [config, fleet] = await Promise.all([fetch('/api/config').then((r) => r.json()), fetch('/api/fleet').then((r) => r.json())]);
-    state.config = config;
-    state.fleet = fleet;
+    const [config, fleet, terms, verification] = await Promise.all([getJSON('/api/config'), getJSON('/api/fleet'), getJSON('/api/terms'), getJSON('/api/verification-config')]);
+    Object.assign(state, { config, fleet, terms, questions: verification.questions });
   } catch {
     $('.fleet-grid').innerHTML = '<p class="muted">We could not load the fleet. Please refresh the page or call us.</p>';
     return;
   }
   applyContact();
   $$('.dep-pct').forEach((el) => (el.textContent = `${state.config.depositPercent}%`));
+  $('[data-terms]').innerHTML = BGForms.termsHtml(state.terms);
+  $('[data-terms-list]').innerHTML = state.terms.rules.map((r) => `<li>${esc(r)}</li>`).join('');
   renderFilters();
   renderFleet();
   setupBooking();
@@ -80,12 +82,12 @@ function carCard(c) {
     ? `<div class="prices"><span class="price">${money(c.dailyRate)} <small>/ day</small></span>${pkgs}</div>`
     : '<div class="prices"><span class="por">Price on request</span></div>';
   const actions = c.dailyRate
-    ? `<div class="car-actions"><button class="btn btn-gold" data-book="${esc(c.id)}">Book</button><button class="btn btn-outline" data-enquire="${esc(c.id)}">Enquire</button></div>`
+    ? `<div class="car-actions"><button class="btn btn-ink" data-book="${esc(c.id)}">Book</button><button class="btn btn-outline" data-enquire="${esc(c.id)}">Enquire</button></div>`
     : `<div class="car-actions single"><button class="btn btn-outline" data-enquire="${esc(c.id)}">Enquire</button></div>`;
   return `
     <article class="car">
       <div class="car-media">
-        <span class="badge${c.featured ? ' gold' : ''}">${c.featured ? 'Premium' : esc(c.category)}</span>
+        <span class="badge${c.featured ? ' signature' : ''}">${c.featured ? 'Signature' : esc(c.category)}</span>
         <img src="${esc(c.image)}" alt="${esc(`${c.name} ${c.trim || ''}`)}" loading="lazy">
       </div>
       <div class="car-body">
@@ -109,6 +111,15 @@ function setupBooking() {
   const form = $('#booking-form');
   form.carId.innerHTML = '<option value="">Choose a vehicle…</option>' +
     bookable().map((c) => `<option value="${esc(c.id)}">${esc(c.name)} · ${money(c.dailyRate)}/day</option>`).join('');
+  form.handover.innerHTML = Object.entries(state.config.handover).map(([k, h]) => `<option value="${esc(k)}">${esc(h.label)}</option>`).join('');
+  $('[data-questions]', form).innerHTML = BGForms.questionsHtml(state.questions);
+  BGForms.wireQuestionNotes(form);
+
+  form.handover.addEventListener('change', () => {
+    const needed = form.handover.value !== 'none';
+    $('[data-address]', form).hidden = !needed;
+    form.delivery.required = needed;
+  });
 
   setDates(form);
   form.pickupDate.addEventListener('change', () => syncReturn(form));
@@ -132,9 +143,20 @@ function setupBooking() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const msg = $('.form-msg', form);
-    if (!validate(form, msg)) return;
+    const firstField = BGForms.firstInvalid(form);
+    const { answers, firstBad } = BGForms.readAnswers(form, state.questions);
+    const problem = firstField || firstBad;
+    if (problem) {
+      msg.className = 'form-msg error';
+      msg.textContent = problem === form.agreeTerms ? 'Please tick to accept the rental terms.' : 'Please complete the highlighted fields.';
+      problem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (problem.focus) problem.focus({ preventScroll: true });
+      return;
+    }
+    msg.textContent = '';
     const data = Object.fromEntries(new FormData(form));
-    data.meetsRequirements = form.meetsRequirements.checked;
+    for (const k of Object.keys(data)) if (k.startsWith('q_')) delete data[k];
+    data.answers = answers;
     data.agreeTerms = form.agreeTerms.checked;
     await submit(form, msg, '/api/bookings', data, (res) => {
       if (res.url) window.location.href = res.url;
@@ -178,11 +200,13 @@ function updateQuote() {
   const form = $('#booking-form');
   const car = state.fleet.find((c) => c.id === form.carId.value);
   const days = Pricing.daysBetween(form.pickupDate.value, form.dropoffDate.value);
-  const total = car && days > 0 ? Pricing.rentalPrice(car, days) : null;
+  const hire = car && days > 0 ? Pricing.rentalPrice(car, days) : null;
+  const fee = state.config.handover[form.handover.value]?.fee || 0;
+  const total = hire ? hire + fee : null;
   const deposit = total && Math.round((total * state.config.depositPercent) / 100);
   const due = form.paymentOption.value === 'full' ? total : deposit;
-  const saving = total ? car.dailyRate * days - total : 0;
-  const set = (k, v) => ($(`[data-q="${k}"]`).textContent = v);
+  const saving = hire ? car.dailyRate * days - hire : 0;
+  const set = (k, v) => ($(`[data-quote="${k}"]`).textContent = v);
 
   $('.summary-car').textContent = car ? car.name : 'Select a vehicle';
   const img = $('.summary-img img');
@@ -195,6 +219,8 @@ function updateQuote() {
   set('days', days > 0 ? `${days} day${days === 1 ? '' : 's'}` : '–');
   $('.summary .saving').hidden = !(saving > 0);
   set('saving', saving > 0 ? `−${money(saving)}` : '');
+  $('.summary .fee').hidden = !fee;
+  set('fee', money(fee));
   set('total', total ? money(total) : '–');
   set('due', due ? money(due) : '–');
 }
@@ -206,30 +232,20 @@ function setupEnquiry() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const msg = $('.form-msg', form);
-    if (!validate(form, msg)) return;
+    const bad = BGForms.firstInvalid(form);
+    if (bad) {
+      msg.className = 'form-msg error';
+      msg.textContent = 'Please fill in the highlighted fields.';
+      bad.focus();
+      return;
+    }
+    msg.textContent = '';
     await submit(form, msg, '/api/inquiries', Object.fromEntries(new FormData(form)), () => {
       form.reset();
       msg.className = 'form-msg ok';
       msg.textContent = "Thanks! Your enquiry has been sent. We'll be in touch shortly.";
     });
   });
-}
-
-function validate(form, msg) {
-  let firstBad = null;
-  $$('[required]', form).forEach((el) => {
-    const bad = el.type === 'checkbox' ? !el.checked : !el.checkValidity() || !el.value.trim();
-    el.classList.toggle('invalid', bad);
-    if (bad && !firstBad) firstBad = el;
-  });
-  if (firstBad) {
-    msg.className = 'form-msg error';
-    msg.textContent = firstBad.type === 'checkbox' ? 'Please tick both boxes to continue.' : 'Please fill in the highlighted fields.';
-    firstBad.focus();
-    return false;
-  }
-  msg.textContent = '';
-  return true;
 }
 
 async function submit(form, msg, url, data, onOk) {

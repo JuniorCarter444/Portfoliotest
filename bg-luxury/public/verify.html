@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Driver Verification | BG LUX</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;1,6..96,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231f1b17'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='700' font-style='italic' font-size='13' fill='%23f4f1ec' text-anchor='middle'%3EBG%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="nav solid">
+    <a href="/" class="brand"><span class="brand-mark">BG LUX</span><span class="brand-text"><b>Luxury Cars</b><small>London</small></span></a>
+  </header>
+
+  <main class="page">
+    <div class="page-narrow">
+      <p class="eyebrow">Driver verification</p>
+      <h1>Verify your details</h1>
+      <p class="muted" id="intro">Please complete this form before your security deposit is taken. Your deposit is determined once we've reviewed it. All documents must be clear, legible and up to date.</p>
+
+      <div id="done" class="panel" hidden>
+        <h2 style="font-size:2rem">Thank you</h2>
+        <p>We've received your verification and documents and will be in touch shortly to confirm your security deposit.</p>
+        <p class="notice warn" id="call-note" hidden></p>
+        <a href="/" class="btn btn-ink">Back to home</a>
+      </div>
+
+      <form id="verify-form" class="panel form" novalidate hidden>
+        <dl class="kv" id="booking-info" hidden></dl>
+
+        <div data-standalone hidden>
+          <h3 class="form-step"><span>01</span>Your details</h3>
+          <div class="grid-2">
+            <label>Full name<input type="text" name="name" autocomplete="name" data-req></label>
+            <label>Phone<input type="tel" name="phone" autocomplete="tel" data-req></label>
+            <label>Email<input type="email" name="email" autocomplete="email" data-req></label>
+            <label>Booking reference <small>(if you have one)</small><input type="text" name="bookingRef"></label>
+          </div>
+
+          <h3 class="form-step"><span>02</span>Driver questions</h3>
+          <div class="questions" data-questions></div>
+
+          <h3 class="form-step"><span>03</span>Rental terms</h3>
+          <div class="terms-box" data-terms tabindex="0" aria-label="Rental terms"></div>
+          <label class="check"><input type="checkbox" name="agreeTerms" value="true" data-req><span>I have read and agree to the BG LUX rental terms, including the security deposit, excess and fines.</span></label>
+          <div class="sign-row">
+            <label class="signature">Type your full name to sign<input type="text" name="signature" data-req></label>
+            <p class="fine">Your acceptance is recorded with the date, time and terms version.</p>
+          </div>
+        </div>
+
+        <h3 class="form-step"><span data-doc-step>04</span>Documents</h3>
+        <div class="grid-2" style="margin-bottom:16px">
+          <label>National Insurance number<input type="text" name="niNumber" placeholder="AB 12 34 56 C" autocomplete="off" required></label>
+        </div>
+        <div class="uploads" data-uploads></div>
+
+        <p class="form-msg" role="alert"></p>
+        <button type="submit" class="btn btn-ink btn-block">Submit verification</button>
+        <p class="fine">Your documents are stored securely and only seen by the BG LUX team. They are used to verify your identity and eligibility to hire.</p>
+      </form>
+    </div>
+  </main>
+
+  <script src="forms.js"></script>
+  <script>
+    (async () => {
+      const $ = (s) => document.querySelector(s);
+      const params = new URLSearchParams(location.search);
+      const form = $('#verify-form');
+      const msg = form.querySelector('.form-msg');
+      const getJSON = (u) => fetch(u).then(async (r) => ({ ok: r.ok, body: await r.json() }));
+
+      const query = params.get('b') ? `?b=${encodeURIComponent(params.get('b'))}&t=${encodeURIComponent(params.get('t') || '')}` : '';
+      const [info, cfg, terms] = await Promise.all([getJSON(`/api/verify${query}`), getJSON('/api/verification-config'), getJSON('/api/terms')]);
+      if (!info.ok) {
+        $('#intro').textContent = info.body.error;
+        return;
+      }
+      const v = info.body;
+      const standalone = v.standalone;
+
+      if (!standalone && v.complete) {
+        $('#done').hidden = false;
+        $('#done p').textContent = "We already have your verification and documents. If you need to change anything, just call us.";
+        return;
+      }
+
+      if (standalone) {
+        form.querySelector('[data-standalone]').hidden = false;
+        form.querySelector('[data-questions]').innerHTML = BGForms.questionsHtml(cfg.body.questions);
+        form.querySelector('[data-terms]').innerHTML = BGForms.termsHtml(terms.body);
+        form.querySelectorAll('[data-req]').forEach((el) => (el.required = true));
+        BGForms.wireQuestionNotes(form);
+      } else {
+        $('#intro').textContent = `Hi ${v.name.split(' ')[0]}, you've already answered the driver questions and accepted the terms. Please add your National Insurance number and documents below.`;
+        form.querySelector('[data-doc-step]').textContent = '';
+        const info = form.querySelector('#booking-info');
+        info.innerHTML = `<div><dt>Booking</dt><dd>${BGForms.esc(v.ref)}</dd></div><div><dt>Vehicle</dt><dd>${BGForms.esc(v.carName)}</dd></div>`;
+        info.hidden = false;
+      }
+      form.querySelector('[data-uploads]').innerHTML = BGForms.uploadsHtml(cfg.body.documents, v.uploaded || []);
+      BGForms.wireUploads(form);
+      form.hidden = false;
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const bad = BGForms.firstInvalid(form);
+        const answers = standalone ? BGForms.readAnswers(form, cfg.body.questions) : { answers: {}, firstBad: null };
+        const tooBig = form.querySelector('.upload.invalid');
+        const problem = bad || answers.firstBad || tooBig;
+        if (problem) {
+          msg.className = 'form-msg error';
+          msg.textContent = 'Please complete the highlighted fields and documents.';
+          problem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+        const data = new FormData(form);
+        for (const k of [...data.keys()]) if (k.startsWith('q_')) data.delete(k);
+        if (standalone) data.set('answers', JSON.stringify(answers.answers));
+        else {
+          data.set('b', params.get('b'));
+          data.set('t', params.get('t'));
+        }
+        const btn = form.querySelector('button[type=submit]');
+        btn.disabled = true;
+        btn.textContent = 'Uploading…';
+        msg.textContent = '';
+        try {
+          const res = await fetch('/api/verify', { method: 'POST', body: data });
+          const out = await res.json().catch(() => ({ error: 'Upload failed. Please try again.' }));
+          if (!res.ok) throw new Error(out.error);
+          form.hidden = true;
+          $('#intro').hidden = true;
+          $('#done').hidden = false;
+          if (out.flags && out.flags.length) {
+            const note = $('#call-note');
+            note.textContent = `Please give us a call to talk through your answer to: ${out.flags.join(' / ')}`;
+            note.hidden = false;
+          }
+          scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (err) {
+          msg.className = 'form-msg error';
+          msg.textContent = err.message;
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Submit verification';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -16,6 +16,14 @@
     return best[days];
   }
 
+  // Delivery and collection fees from the BG LUX terms (£40 each way).
+  const HANDOVER = {
+    none: { label: 'I will collect and return the car myself', fee: 0 },
+    delivery: { label: 'Delivery to me (£40)', fee: 40 },
+    collection: { label: 'Collection from me at the end (£40)', fee: 40 },
+    both: { label: 'Delivery and collection (£80)', fee: 80 }
+  };
+
   function daysBetween(start, end) {
     const a = Date.parse(`${start}T00:00:00Z`);
     const b = Date.parse(`${end}T00:00:00Z`);
@@ -23,7 +31,7 @@
     return Math.round((b - a) / 86400000);
   }
 
-  const api = { rentalPrice, daysBetween };
+  const api = { rentalPrice, daysBetween, HANDOVER };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Pricing = api;
 })(this);

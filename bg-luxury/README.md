@@ -1,50 +1,76 @@
-# BG Luxury Cars: refreshed site
+# BG LUX Luxury Cars: refreshed website
 
-A redesigned luxury car rental website with:
-
-- **Online booking form**: pick a car and dates, see a live quote, then pay a deposit or the full amount.
-- **Secure payments via Stripe Checkout**: card details go straight to Stripe and never touch this server. Prices are calculated on the server from `data/fleet.js`, so a customer can't change the amount in their browser.
-- **Contact / inquiry form** for chauffeur quotes, events and general questions.
-- Filterable fleet, how it works, services, FAQ/requirements, and a layout that works on phones.
+A refreshed, modernised site for BG LUX Luxury Cars London, with online booking, payments, driver verification, security deposits and confirmation emails.
 
 ![Homepage](screenshot.png)
+
+## What it does
+
+**For customers**
+
+- Browse the fleet (real BG LUX cars and prices, 3-day and weekly rates, price-on-request cars go to the enquiry form).
+- **Book online**: choose a car, dates and delivery/collection (£40 each way), answer the 7 driver questions, read the full rental terms, tick to accept and type their name to sign, then pay a 25% reservation payment or the full amount through Stripe.
+- **Verify**: upload licence (front and back), NI number, PDF bank statement, utility bill and a second proof of address using a secure link. Customers who booked by phone or WhatsApp can use `/verify.html` directly.
+- **Security deposit**: once you set the amount, they get an email linking to a page that shows the terms again. They must tick to accept and sign before paying.
+- Emails at every step (booking confirmed, documents received, deposit request, deposit received, deposit refunded, balance paid, enquiry received).
+
+**For you (the admin page at `/admin`)**
+
+- See every booking, verification and enquiry.
+- Review driver answers (anything needing a call is flagged in red) and open the uploaded documents.
+- See the terms acceptance record: the exact terms version, typed signature, date and time, and IP address.
+- Request the security deposit (£1,000 to £10,000, your choice per customer), or mark it paid if they paid by bank transfer, card terminal or cash.
+- Refund the deposit after the 3-week window, in full or minus deductions with a reason (the customer is emailed the breakdown).
+- Charge any remaining hire balance to the card saved at checkout.
+- Delete a customer's documents when you no longer need them.
 
 ## Run it locally
 
 ```bash
 cd bg-luxury
 npm install
-cp .env.example .env   # optional, see below
-npm start              # http://localhost:3000
+cp .env.example .env    # then set at least ADMIN_PASSWORD
+npm start               # http://localhost:3000, admin at http://localhost:3000/admin
 ```
 
-Without a Stripe key the site runs in **demo mode**: bookings are saved but no card is charged, and the confirmation page says so.
+With nothing else configured it runs in **demo mode**: payments are simulated and emails are saved to `data/outbox.json` instead of being sent, so you can click through the whole journey safely.
 
-## Turn on real payments
+## Going live: checklist
 
-1. Create a [Stripe](https://dashboard.stripe.com/register) account and copy the **secret key** (`sk_test_...` while testing) into `STRIPE_SECRET_KEY` in `.env`.
-2. Set `SITE_URL` to the public address of the site (Stripe returns customers there after paying).
-3. Add a webhook in the Stripe Dashboard pointing to `https://YOUR-SITE/api/stripe/webhook` with the `checkout.session.completed` event, and put its signing secret in `STRIPE_WEBHOOK_SECRET`. This is what marks a booking as `paid`.
-   For local testing: `stripe listen --forward-to localhost:3000/api/stripe/webhook`.
-4. Use Stripe's test card `4242 4242 4242 4242` to try it, then switch to the live key when ready.
+1. **Contact details**: set `CONTACT_PHONE`, `CONTACT_WHATSAPP`, `CONTACT_EMAIL` and `CONTACT_INSTAGRAM` in `.env`.
+2. **Stripe** (payments and deposits):
+   - Put your secret key in `STRIPE_SECRET_KEY` (test key `sk_test_...` first; test card `4242 4242 4242 4242`).
+   - In the Stripe Dashboard, add a webhook to `https://YOUR-SITE/api/stripe/webhook` for the `checkout.session.completed` event and put its signing secret in `STRIPE_WEBHOOK_SECRET`. This is what confirms bookings and deposits.
+3. **Email**: fill in the `SMTP_*` settings from your email provider and set `MAIL_FROM` and `BUSINESS_EMAIL`. Any provider with SMTP works (Google Workspace, Microsoft 365, Zoho, SendGrid, Resend).
+4. **Admin**: set a long, unique `ADMIN_PASSWORD`.
+5. **Hosting**: this is a Node.js (18+) app, so it needs a host that runs a server (Render, Railway, Fly.io or a VPS), with HTTPS. It won't work on GitHub Pages. Set `SITE_URL` to your web address and `TRUST_PROXY=1` if the host puts a proxy in front.
+6. **Storage**: bookings and documents are saved in the `data/` folder. Use a host with a **persistent disk** (many wipe local files on each deploy), and back it up. For a bigger operation, move to a database and private cloud storage (e.g. S3), which `data/store.js` and the upload code are set up to swap out.
 
-Adjust `DEPOSIT_PERCENT`, `SECURITY_DEPOSIT` and `CURRENCY` in `.env` as needed.
+## How deposits work, and why
 
-## Customize the content
+Your terms say the deposit is refunded **3 weeks after return**. A card "hold" (pre-authorisation) normally expires after about 7 days, so the site **charges** the deposit and you **refund** it from the admin page. Two things to know:
 
-Everything business-specific is placeholder content. Replace it with the real details before going live:
+- Stripe keeps its processing fee when you refund (roughly 1.5% + 20p on UK cards, so about £37 on a £2,500 deposit). Customers can also pay by bank transfer instead; use "Mark paid" in the admin page, and refund them yourself.
+- Card refunds take 5 to 10 working days to show on the customer's statement.
+
+## Data protection (UK GDPR)
+
+You'll be storing ID documents, NI numbers and bank statements, which are sensitive. Before going live:
+
+- Add a **privacy notice** to the site saying what you collect, why, how long you keep it and who sees it.
+- Decide a **retention period** (for example, delete documents 3 months after the deposit is refunded) and use "Delete documents" in the admin page.
+- Keep `ADMIN_PASSWORD` private, use HTTPS, and limit who has server access.
+- You'll likely need to register with the ICO as a data controller if you haven't already.
+
+## Editing content
 
 | What | Where |
 | --- | --- |
-| Cars, daily rates, specs, photos (`image` URL) | `data/fleet.js` |
-| Phone, email, hours, location | Contact section in `public/index.html` |
-| Policies (age, insurance, cancellation, mileage) | FAQ section in `public/index.html` |
-| Colors and fonts | Variables at the top of `public/styles.css` |
+| Cars, prices, packages, photos | `data/fleet.js` (photos in `public/images/`) |
+| Rental terms | `data/terms.js`. Change `VERSION` whenever you edit the wording, so acceptances show which version was agreed to |
+| Driver questions and required documents | `data/verification.js` |
+| Delivery/collection fees | `HANDOVER` in `public/pricing.js` |
+| Email wording | `lib/emails.js` |
+| Colours and fonts | Variables at the top of `public/styles.css` |
 
-## Where submissions go
-
-Bookings and messages are saved to `data/bookings.json` and `data/inquiries.json` (not committed to git). That's fine for a demo. For production, connect `data/store.js` to a database, or forward submissions to email/a CRM. Many hosts (Render, Railway, Fly.io) wipe the local disk on redeploy.
-
-## Hosting
-
-This is a small Node.js (18+) app. It needs a host that runs a server (Render, Railway, Fly.io, a VPS). It won't work on GitHub Pages, which only serves static files.
+The car photos were cropped from screenshots of the old site, so they're low resolution. Replace them with the original photos (same file names) for the best result.

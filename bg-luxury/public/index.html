@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BG LUX | Luxury Self-Drive Car Hire London</title>
   <meta name="description" content="London's premium self-drive hire. Lamborghini, Rolls-Royce, Range Rover and more. Book online, pay securely, or call to book.">
-  <meta name="theme-color" content="#0a0a0a">
+  <meta name="theme-color" content="#1b1916">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,700;1,6..96,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0a0a'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='700' font-style='italic' font-size='13' fill='%23d4af5f' text-anchor='middle'%3EBG%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231f1b17'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='700' font-style='italic' font-size='13' fill='%23f4f1ec' text-anchor='middle'%3EBG%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -27,7 +27,7 @@
     </nav>
     <div class="nav-actions">
       <a class="nav-call" data-tel aria-label="Call us"><svg class="i"><use href="#i-phone"/></svg><span data-text="phone"></span></a>
-      <a href="#book" class="btn btn-gold btn-sm">Book now</a>
+      <a href="#book" class="btn btn-ink btn-sm">Book now</a>
       <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
     </div>
   </header>
@@ -39,19 +39,19 @@
       <h1>Drive in<br><em>Style.</em></h1>
       <p class="lead">From Lamborghini to Rolls-Royce: premium self-drive hire and music video shoots across London. Book online in minutes.</p>
       <div class="hero-cta">
-        <a href="#book" class="btn btn-gold">Book online</a>
-        <a class="btn btn-outline" data-tel><svg class="i"><use href="#i-phone"/></svg> Call to book</a>
+        <a href="#book" class="btn btn-light">Book online</a>
+        <a class="btn btn-ghost-light" data-tel><svg class="i"><use href="#i-phone"/></svg> Call to book</a>
       </div>
 
       <form class="quick-book" id="quick-book">
         <label>Vehicle<select name="carId" aria-label="Vehicle"></select></label>
         <label>Pick-up<input type="date" name="pickupDate" aria-label="Pick-up date"></label>
         <label>Return<input type="date" name="dropoffDate" aria-label="Return date"></label>
-        <button class="btn btn-gold" type="submit">Check price</button>
+        <button class="btn btn-light" type="submit">Check price</button>
       </form>
 
       <ul class="hero-stats">
-        <li><strong>10+</strong><span>Luxury cars</span></li>
+        <li><strong>10<span class="plus">+</span></strong><span>Luxury cars</span></li>
         <li><strong>London</strong><span>Based</span></li>
         <li><strong>24/7</strong><span>Available</span></li>
       </ul>
@@ -76,9 +76,10 @@
       <h2 id="how-title">How it works</h2>
     </div>
     <ol class="steps">
-      <li><span>01</span><h3>Choose your car</h3><p>Browse the fleet and pick your dates. You'll see your price instantly, including 3-day and weekly rates.</p></li>
-      <li><span>02</span><h3>Reserve securely</h3><p>Pay a deposit or the full amount online. Card payments are handled by Stripe.</p></li>
-      <li><span>03</span><h3>Verify &amp; collect</h3><p>We check your licence and documents, take the refundable security deposit and hand over the keys.</p></li>
+      <li><span>01</span><h3>Book &amp; sign</h3><p>Choose your car and dates, answer a few driver questions, accept the rental terms and reserve online.</p></li>
+      <li><span>02</span><h3>Verify</h3><p>Upload your licence, NI number, bank statement and two proofs of address using the secure link we email you.</p></li>
+      <li><span>03</span><h3>Security deposit</h3><p>We confirm your deposit (£1,000 to £10,000). Review the terms once more and pay it online.</p></li>
+      <li><span>04</span><h3>Drive in style</h3><p>Collect the car or have it delivered. Your deposit is refunded 3 weeks after return.</p></li>
     </ol>
   </section>
 
@@ -89,7 +90,7 @@
     </div>
     <div class="book-layout">
       <form id="booking-form" class="panel form" novalidate>
-        <h3 class="form-step">1. Your hire</h3>
+        <h3 class="form-step"><span>01</span>Your hire</h3>
         <div class="grid-2">
           <label class="full">Vehicle
             <select name="carId" required></select>
@@ -97,30 +98,41 @@
           <label>Pick-up date<input type="date" name="pickupDate" required></label>
           <label>Return date<input type="date" name="dropoffDate" required></label>
           <label>Pick-up time<input type="time" name="pickupTime" value="10:00"></label>
-          <label>Delivery address <small>(optional)</small><input type="text" name="delivery" placeholder="Leave blank to collect"></label>
+          <label>Handover<select name="handover"></select></label>
+          <label class="full" data-address hidden>Address for delivery / collection<input type="text" name="delivery" autocomplete="street-address"></label>
         </div>
 
-        <h3 class="form-step">2. Your details</h3>
+        <h3 class="form-step"><span>02</span>Your details</h3>
         <div class="grid-2">
           <label>Full name<input type="text" name="name" autocomplete="name" required></label>
           <label>Phone<input type="tel" name="phone" autocomplete="tel" required></label>
           <label class="full">Email<input type="email" name="email" autocomplete="email" required></label>
-          <label class="full">Notes <small>(occasion, special requests)</small><textarea name="notes" rows="3"></textarea></label>
+          <label class="full">Notes <small>(occasion, special requests)</small><textarea name="notes" rows="2"></textarea></label>
         </div>
         <input type="text" name="company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-        <h3 class="form-step">3. Payment</h3>
-        <div class="pay-options" role="radiogroup" aria-label="Payment option">
-          <label class="pay-card"><input type="radio" name="paymentOption" value="deposit" checked><span><b>Pay <span class="dep-pct">25%</span> deposit</b><small>Balance due at collection</small></span></label>
-          <label class="pay-card"><input type="radio" name="paymentOption" value="full"><span><b>Pay in full</b><small>Nothing more to pay on the day</small></span></label>
+        <h3 class="form-step"><span>03</span>Driver questions</h3>
+        <p class="form-intro">Your security deposit is set from these answers and your documents.</p>
+        <div class="questions" data-questions></div>
+
+        <h3 class="form-step"><span>04</span>Rental terms</h3>
+        <p class="form-intro">Please read the terms in full before you continue.</p>
+        <div class="terms-box" data-terms tabindex="0" aria-label="Rental terms"></div>
+        <label class="check"><input type="checkbox" name="agreeTerms" required><span>I have read and agree to the BG LUX rental terms, including the security deposit, excess and fines.</span></label>
+        <div class="sign-row">
+          <label class="signature">Type your full name to sign<input type="text" name="signature" autocomplete="name" required></label>
+          <p class="fine">Your acceptance is recorded with the date, time and terms version.</p>
         </div>
 
-        <label class="check"><input type="checkbox" name="meetsRequirements" required><span>I meet the <a href="#requirements">driver requirements</a>.</span></label>
-        <label class="check"><input type="checkbox" name="agreeTerms" required><span>I accept the <a href="#terms">hire terms</a>, including the refundable security deposit taken at collection.</span></label>
+        <h3 class="form-step"><span>05</span>Payment</h3>
+        <div class="pay-options" role="radiogroup" aria-label="Payment option">
+          <label class="pay-card"><input type="radio" name="paymentOption" value="deposit" checked><span><b>Reserve with <span class="dep-pct">25%</span></b><small>Balance due before collection</small></span></label>
+          <label class="pay-card"><input type="radio" name="paymentOption" value="full"><span><b>Pay in full</b><small>Nothing more to pay for the hire</small></span></label>
+        </div>
 
         <p class="form-msg" role="alert"></p>
-        <button type="submit" class="btn btn-gold btn-block">Continue to secure payment</button>
-        <p class="fine"><svg class="i"><use href="#i-lock"/></svg> Payments are processed securely by Stripe. We never see or store your card details.</p>
+        <button type="submit" class="btn btn-ink btn-block">Continue to secure payment</button>
+        <p class="fine"><svg class="i"><use href="#i-lock"/></svg> Card payments are processed by Stripe. We never see or store your card number. The refundable security deposit is taken separately, after verification.</p>
       </form>
 
       <aside class="panel summary" aria-live="polite">
@@ -129,44 +141,49 @@
           <p class="eyebrow">Your quote</p>
           <h3 class="summary-car">Select a vehicle</h3>
           <dl>
-            <div><dt>Daily rate</dt><dd data-q="rate">–</dd></div>
-            <div><dt>Hire length</dt><dd data-q="days">–</dd></div>
-            <div class="saving" hidden><dt>Package saving</dt><dd data-q="saving">–</dd></div>
-            <div class="total"><dt>Hire total</dt><dd data-q="total">–</dd></div>
-            <div class="due"><dt>Due today</dt><dd data-q="due">–</dd></div>
+            <div><dt>Daily rate</dt><dd data-quote="rate">–</dd></div>
+            <div><dt>Hire length</dt><dd data-quote="days">–</dd></div>
+            <div class="saving" hidden><dt>Package saving</dt><dd data-quote="saving">–</dd></div>
+            <div class="fee" hidden><dt>Delivery / collection</dt><dd data-quote="fee">–</dd></div>
+            <div class="total"><dt>Total</dt><dd data-quote="total">–</dd></div>
+            <div class="due"><dt>Due today</dt><dd data-quote="due">–</dd></div>
           </dl>
-          <p class="fine">A refundable security deposit is taken at collection. Fuel, excess mileage and fines are charged separately.</p>
+          <p class="fine">Plus a refundable security deposit of £1,000 to £10,000, confirmed after verification. 100 miles a day included (£1 per extra mile).</p>
         </div>
       </aside>
     </div>
   </section>
 
-  <!-- Requirements and terms below are placeholders based on typical London self-drive hire. Confirm with BG LUX before going live. -->
   <section id="requirements" class="section section-alt">
     <div class="section-head">
-      <p class="eyebrow">Before you book</p>
-      <h2>Driver requirements</h2>
+      <p class="eyebrow">Before you drive</p>
+      <h2>Requirements</h2>
+      <p class="muted">All documents must be clear, legible and up to date. Booked by phone or WhatsApp? <a href="verify.html">Complete your verification here</a>.</p>
     </div>
     <ul class="req-grid">
-      <li><svg class="i"><use href="#i-user"/></svg><h3>Aged 25+</h3><p>Minimum age 25. Some supercars may require drivers to be older.</p></li>
-      <li><svg class="i"><use href="#i-card"/></svg><h3>Full licence</h3><p>Full UK or EU driving licence held for at least 3 years.</p></li>
-      <li><svg class="i"><use href="#i-doc"/></svg><h3>ID &amp; address</h3><p>Photo ID plus proof of address dated within the last 3 months.</p></li>
-      <li><svg class="i"><use href="#i-shield"/></svg><h3>Security deposit</h3><p>Refundable deposit taken at collection. The amount depends on the vehicle.</p></li>
+      <li><svg class="i"><use href="#i-card"/></svg><h3>Licence &amp; NI number</h3><p>A clear photo of your driving licence (front and back) and your National Insurance number.</p></li>
+      <li><svg class="i"><use href="#i-doc"/></svg><h3>Proof of address</h3><ul><li>PDF bank statement from your online banking, dated within the last 2 months</li><li>A recent utility bill</li><li>One more, such as a letter from an official body</li></ul></li>
+      <li><svg class="i"><use href="#i-user"/></svg><h3>Driver questions</h3><p>Your age, how long you've held your licence, points, disqualifications, current insurance and any previous claims. Some answers need a quick call.</p></li>
     </ul>
   </section>
 
   <section id="terms" class="section">
     <div class="section-head">
-      <p class="eyebrow">The small print</p>
-      <h2>Hire terms</h2>
+      <p class="eyebrow">Please read before booking</p>
+      <h2>Rental terms</h2>
     </div>
-    <div class="faq">
-      <details><summary>Reservations &amp; payment</summary><p>Reserve online with a <span class="dep-pct">25%</span> deposit or pay in full. Any balance is due at collection.</p></details>
-      <details><summary>Security deposit</summary><p>A refundable security deposit is taken at collection and released once the car is returned in the same condition.</p></details>
-      <details><summary>Cancellations</summary><p>Cancel more than 72 hours before collection for a full refund of your reservation payment. Later cancellations may forfeit it.</p></details>
-      <details><summary>Mileage &amp; fuel</summary><p>Each hire includes a daily mileage allowance. Excess miles are charged per mile. Please return the car with the same fuel level.</p></details>
-      <details><summary>Fines, tolls &amp; PCNs</summary><p>The hirer is responsible for parking fines, speeding tickets, ULEZ/congestion charges and tolls during the hire, plus an admin fee.</p></details>
-      <details><summary>Music video &amp; photo shoots</summary><p>Cars are available by the hour for music videos and shoots (Urus from £200/hr). Send an enquiry with your date, location and brief.</p></details>
+    <div class="terms-layout">
+      <div class="key-facts">
+        <div class="fact"><b>£1k – £10k</b><span>Security deposit, refunded 3 weeks after return once the car is clear of fines</span></div>
+        <div class="fact"><b>£2,000</b><span>Excess for any incident, plus £450 for loss of insurance</span></div>
+        <div class="fact"><b>100 miles / day</b><span>£1 per extra mile. Unlimited miles on request</span></div>
+        <div class="fact"><b>£40 each way</b><span>Delivery and collection fee</span></div>
+      </div>
+      <div>
+        <ul class="house-rules"><li>🚭 No smoking</li><li>🥤 No eating or drinking</li><li>🎈 No balloons</li></ul>
+        <ol class="terms-full" data-terms-list></ol>
+        <p class="muted" style="margin-top:18px">Administration fee of £50 for each letter received for any vehicle, in addition to the costs or fines in the letter. Report any incident immediately.</p>
+      </div>
     </div>
   </section>
 
@@ -198,7 +215,7 @@
         </div>
         <input type="text" name="company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
         <p class="form-msg" role="alert"></p>
-        <button type="submit" class="btn btn-gold btn-block">Send enquiry</button>
+        <button type="submit" class="btn btn-ink btn-block">Send enquiry</button>
       </form>
     </div>
   </section>
@@ -219,7 +236,7 @@
   <footer class="footer">
     <a href="#top" class="brand"><span class="brand-mark">BG LUX</span><span class="brand-text"><b>Luxury Cars</b><small>London</small></span></a>
     <nav aria-label="Footer">
-      <a href="#fleet">Fleet</a><a href="#requirements">Requirements</a><a href="#terms">Terms</a><a href="#enquiry">Enquiry</a><a data-ig target="_blank" rel="noopener">Instagram</a>
+      <a href="#fleet">Fleet</a><a href="#requirements">Requirements</a><a href="#terms">Terms</a><a href="verify.html">Verification</a><a href="#enquiry">Enquiry</a><a data-ig target="_blank" rel="noopener">Instagram</a>
     </nav>
     <p>&copy; <span id="year"></span> BG LUX Luxury Cars London. Drive in Style.</p>
   </footer>
@@ -241,10 +258,10 @@
     <symbol id="i-user" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></g></symbol>
     <symbol id="i-card" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.5"/><path d="M13 10h5M13 14h4"/></g></symbol>
     <symbol id="i-doc" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></g></symbol>
-    <symbol id="i-shield" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></g></symbol>
   </svg>
 
   <script src="pricing.js"></script>
+  <script src="forms.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

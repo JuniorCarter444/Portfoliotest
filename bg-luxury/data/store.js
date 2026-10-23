@@ -34,4 +34,8 @@ function update(name, id, fields) {
   return row;
 }
 
-module.exports = { readAll, insert, update };
+function find(name, id) {
+  return readAll(name).find((r) => r.id === id) || null;
+}
+
+module.exports = { readAll, insert, update, find };

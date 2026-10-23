@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Security Deposit | BG LUX</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;1,6..96,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231f1b17'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='700' font-style='italic' font-size='13' fill='%23f4f1ec' text-anchor='middle'%3EBG%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="nav solid">
+    <a href="/" class="brand"><span class="brand-mark">BG LUX</span><span class="brand-text"><b>Luxury Cars</b><small>London</small></span></a>
+  </header>
+
+  <main class="page">
+    <div class="page-narrow">
+      <p class="eyebrow">Refundable security deposit</p>
+      <h1 id="title">Your security deposit</h1>
+      <p class="muted" id="intro">Loading…</p>
+
+      <div id="paid" class="panel" hidden>
+        <h2 style="font-size:2rem">Deposit received</h2>
+        <p class="notice" id="demo" hidden>Demo mode: no card was charged.</p>
+        <p>Thank you. Your deposit will be refunded 3 weeks after the vehicle is returned, once it's clear of any fines or tickets, less any charges under the rental terms.</p>
+        <a href="/" class="btn btn-ink">Back to home</a>
+      </div>
+
+      <div id="processing" class="panel" hidden>
+        <h2 style="font-size:2rem">Payment processing</h2>
+        <p>Thanks, we're confirming your payment with the bank. You'll receive an email as soon as it's complete.</p>
+      </div>
+
+      <form id="deposit-form" class="panel form" novalidate hidden>
+        <p class="eyebrow" style="margin:0">Amount</p>
+        <p class="amount" data-amount></p>
+        <dl class="kv" data-info></dl>
+
+        <h3 class="form-step"><span>01</span>Rental terms</h3>
+        <p class="form-intro">Please read the terms in full. You need to accept them before the deposit is taken.</p>
+        <div class="terms-box" data-terms tabindex="0" aria-label="Rental terms"></div>
+        <label class="check"><input type="checkbox" name="agreeTerms" required><span>I have read and accept the BG LUX rental terms. I understand the deposit is refunded 3 weeks after the vehicle is returned, less any charges set out in the terms.</span></label>
+        <div class="sign-row">
+          <label class="signature">Type your full name to sign<input type="text" name="signature" autocomplete="name" required></label>
+          <p class="fine">Your acceptance is recorded with the date, time and terms version.</p>
+        </div>
+
+        <h3 class="form-step"><span>02</span>Payment</h3>
+        <p class="form-msg" role="alert"></p>
+        <button type="submit" class="btn btn-ink btn-block">Accept terms &amp; pay deposit</button>
+        <p class="fine">Card payments are processed securely by Stripe. We never see or store your card number.</p>
+      </form>
+    </div>
+  </main>
+
+  <script src="forms.js"></script>
+  <script>
+    (async () => {
+      const $ = (s) => document.querySelector(s);
+      const params = new URLSearchParams(location.search);
+      const b = params.get('b');
+      const t = params.get('t');
+      const form = $('#deposit-form');
+      const msg = form.querySelector('.form-msg');
+      const money = (n) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(n);
+      const day = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+      const [res, terms] = await Promise.all([
+        fetch(`/api/deposit?b=${encodeURIComponent(b || '')}&t=${encodeURIComponent(t || '')}`),
+        fetch('/api/terms').then((r) => r.json())
+      ]);
+      const d = await res.json();
+      if (!res.ok) {
+        $('#intro').textContent = d.error;
+        return;
+      }
+      $('#intro').textContent = `Hi ${d.name.split(' ')[0]}, thanks for completing your verification. Please review the rental terms and pay your refundable security deposit.`;
+
+      if (d.status !== 'requested') {
+        $('#intro').hidden = true;
+        $('#paid').hidden = false;
+        $('#demo').hidden = !params.get('demo');
+        return;
+      }
+      if (params.get('paid')) {
+        // Back from Stripe before its confirmation reached us.
+        $('#intro').hidden = true;
+        $('#processing').hidden = false;
+        return;
+      }
+
+      form.querySelector('[data-amount]').textContent = money(d.amount);
+      form.querySelector('[data-info]').innerHTML = `
+        <div><dt>Booking</dt><dd>${BGForms.esc(d.ref)}</dd></div>
+        <div><dt>Vehicle</dt><dd>${BGForms.esc(d.carName)}</dd></div>
+        <div><dt>Dates</dt><dd>${day(d.pickupDate)} → ${day(d.dropoffDate)}</dd></div>
+        <div><dt>Refunded</dt><dd>3 weeks after return</dd></div>`;
+      form.querySelector('[data-terms]').innerHTML = BGForms.termsHtml(terms);
+      form.hidden = false;
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const bad = BGForms.firstInvalid(form);
+        if (bad) {
+          msg.className = 'form-msg error';
+          msg.textContent = bad.type === 'checkbox' ? 'Please tick to accept the rental terms.' : 'Please type your full name to sign.';
+          bad.focus();
+          return;
+        }
+        const btn = form.querySelector('button[type=submit]');
+        btn.disabled = true;
+        msg.textContent = '';
+        try {
+          const r = await fetch('/api/deposit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ b, t, agreeTerms: form.agreeTerms.checked, signature: form.signature.value })
+          });
+          const out = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error(out.error || 'Something went wrong. Please try again.');
+          location.href = out.url;
+        } catch (err) {
+          msg.className = 'form-msg error';
+          msg.textContent = err.message;
+          btn.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;1,6..96,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231f1b17'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='700' font-style='italic' font-size='13' fill='%23f4f1ec' text-anchor='middle'%3EBG%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <title>Booking Confirmed | BG LUX</title>
+</head>
+<body>
+  <main class="result">
+    <div class="panel">
+      <a href="/" class="brand" style="margin-bottom:28px"><span class="brand-mark">BG LUX</span><span class="brand-text"><b>Luxury Cars</b><small>London</small></span></a>
+      <p class="eyebrow">Booking confirmed</p>
+      <h1>Thank you</h1>
+      <p class="notice" hidden id="demo">Demo mode: no payment was taken. Add your Stripe keys to accept real payments.</p>
+      <p class="muted">Your booking is in and a confirmation email is on its way.</p>
+      <dl id="details" hidden></dl>
+      <div id="next" hidden>
+        <p class="notice"><b>Next step:</b> upload your driving licence, NI number, bank statement and proofs of address. We'll confirm your security deposit once we've reviewed them.</p>
+        <a id="verify-link" class="btn btn-ink btn-block">Upload documents now</a>
+        <p class="fine" style="justify-content:center">You can also use the link in your confirmation email.</p>
+      </div>
+      <a href="/" class="btn btn-outline" id="home" style="margin-top:12px">Back to home</a>
+    </div>
+  </main>
+  <script>
+    const params = new URLSearchParams(location.search);
+    document.getElementById('demo').hidden = !params.get('demo');
+    const b = params.get('b');
+    const t = params.get('t');
+    const fmt = (n) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(n);
+    const day = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    if (b && t) {
+      fetch(`/api/bookings/${encodeURIComponent(b)}?t=${encodeURIComponent(t)}`).then((r) => (r.ok ? r.json() : null)).then((bk) => {
+        if (!bk) return;
+        const rows = [
+          ['Reference', bk.ref],
+          ['Vehicle', bk.carName],
+          ['Dates', `${day(bk.pickupDate)} → ${day(bk.dropoffDate)}`],
+          ['Total', fmt(bk.total)],
+          [bk.paymentOption === 'full' ? 'Paid in full' : 'Paid today', fmt(bk.amountDue)]
+        ];
+        const dl = document.getElementById('details');
+        rows.forEach(([k, v]) => {
+          const div = document.createElement('div');
+          div.innerHTML = '<dt></dt><dd></dd>';
+          div.children[0].textContent = k;
+          div.children[1].textContent = v;
+          dl.appendChild(div);
+        });
+        dl.hidden = false;
+        if (!bk.documentsDone) {
+          document.getElementById('verify-link').href = `/verify.html?b=${encodeURIComponent(b)}&t=${encodeURIComponent(t)}`;
+          document.getElementById('next').hidden = false;
+        }
+      });
+    }
+  </script>
+</body>
+</html>

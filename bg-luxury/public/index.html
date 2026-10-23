@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BG LUX | Luxury Self-Drive Car Hire London</title>
+  <meta name="description" content="London's premium self-drive hire. Lamborghini, Rolls-Royce, Range Rover and more. Book online, pay securely, or call to book.">
+  <meta name="theme-color" content="#1b1916">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,700;1,6..96,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231f1b17'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='700' font-style='italic' font-size='13' fill='%23f4f1ec' text-anchor='middle'%3EBG%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="nav" id="top">
+    <a href="#top" class="brand" aria-label="BG LUX Luxury Cars London, home">
+      <span class="brand-mark">BG LUX</span>
+      <span class="brand-text"><b>Luxury Cars</b><small>London</small></span>
+    </a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="#fleet">Fleet</a>
+      <a href="#requirements">Requirements</a>
+      <a href="#terms">Terms</a>
+      <a href="#enquiry">Enquiry</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="nav-call" data-tel aria-label="Call us"><svg class="i"><use href="#i-phone"/></svg><span data-text="phone"></span></a>
+      <a href="#book" class="btn btn-ink btn-sm">Book now</a>
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <p class="eyebrow">London's premium self-drive hire</p>
+      <h1>Drive in<br><em>Style.</em></h1>
+      <p class="lead">From Lamborghini to Rolls-Royce: premium self-drive hire and music video shoots across London. Book online in minutes.</p>
+      <div class="hero-cta">
+        <a href="#book" class="btn btn-light">Book online</a>
+        <a class="btn btn-ghost-light" data-tel><svg class="i"><use href="#i-phone"/></svg> Call to book</a>
+      </div>
+
+      <form class="quick-book" id="quick-book">
+        <label>Vehicle<select name="carId" aria-label="Vehicle"></select></label>
+        <label>Pick-up<input type="date" name="pickupDate" aria-label="Pick-up date"></label>
+        <label>Return<input type="date" name="dropoffDate" aria-label="Return date"></label>
+        <button class="btn btn-light" type="submit">Check price</button>
+      </form>
+
+      <ul class="hero-stats">
+        <li><strong>10<span class="plus">+</span></strong><span>Luxury cars</span></li>
+        <li><strong>London</strong><span>Based</span></li>
+        <li><strong>24/7</strong><span>Available</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="fleet" class="section">
+    <div class="section-head split">
+      <div>
+        <p class="eyebrow">The collection</p>
+        <h2>Our fleet</h2>
+      </div>
+      <div class="filters" role="tablist" aria-label="Filter by category"></div>
+    </div>
+    <div class="featured-grid" aria-live="polite"></div>
+    <div class="fleet-grid" aria-live="polite"></div>
+  </section>
+
+  <section class="section section-alt" aria-labelledby="how-title">
+    <div class="section-head">
+      <p class="eyebrow">Simple from start to finish</p>
+      <h2 id="how-title">How it works</h2>
+    </div>
+    <ol class="steps">
+      <li><span>01</span><h3>Book &amp; sign</h3><p>Choose your car and dates, answer a few driver questions, accept the rental terms and reserve online.</p></li>
+      <li><span>02</span><h3>Verify</h3><p>Upload your licence, NI number, bank statement and two proofs of address using the secure link we email you.</p></li>
+      <li><span>03</span><h3>Security deposit</h3><p>We confirm your deposit (£1,000 to £10,000). Review the terms once more and pay it online.</p></li>
+      <li><span>04</span><h3>Drive in style</h3><p>Collect the car or have it delivered. Your deposit is refunded 3 weeks after return.</p></li>
+    </ol>
+  </section>
+
+  <section id="book" class="section">
+    <div class="section-head">
+      <p class="eyebrow">Reserve online</p>
+      <h2>Book your car</h2>
+    </div>
+    <div class="book-layout">
+      <form id="booking-form" class="panel form" novalidate>
+        <h3 class="form-step"><span>01</span>Your hire</h3>
+        <div class="grid-2">
+          <label class="full">Vehicle
+            <select name="carId" required></select>
+          </label>
+          <label>Pick-up date<input type="date" name="pickupDate" required></label>
+          <label>Return date<input type="date" name="dropoffDate" required></label>
+          <label>Pick-up time<input type="time" name="pickupTime" value="10:00"></label>
+          <label>Handover<select name="handover"></select></label>
+          <label class="full" data-address hidden>Address for delivery / collection<input type="text" name="delivery" autocomplete="street-address"></label>
+        </div>
+
+        <h3 class="form-step"><span>02</span>Your details</h3>
+        <div class="grid-2">
+          <label>Full name<input type="text" name="name" autocomplete="name" required></label>
+          <label>Phone<input type="tel" name="phone" autocomplete="tel" required></label>
+          <label class="full">Email<input type="email" name="email" autocomplete="email" required></label>
+          <label class="full">Notes <small>(occasion, special requests)</small><textarea name="notes" rows="2"></textarea></label>
+        </div>
+        <input type="text" name="company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+        <h3 class="form-step"><span>03</span>Driver questions</h3>
+        <p class="form-intro">Your security deposit is set from these answers and your documents.</p>
+        <div class="questions" data-questions></div>
+
+        <h3 class="form-step"><span>04</span>Rental terms</h3>
+        <p class="form-intro">Please read the terms in full before you continue.</p>
+        <div class="terms-box" data-terms tabindex="0" aria-label="Rental terms"></div>
+        <label class="check"><input type="checkbox" name="agreeTerms" required><span>I have read and agree to the BG LUX rental terms, including the security deposit, excess and fines.</span></label>
+        <div class="sign-row">
+          <label class="signature">Type your full name to sign<input type="text" name="signature" autocomplete="name" required></label>
+          <p class="fine">Your acceptance is recorded with the date, time and terms version.</p>
+        </div>
+
+        <h3 class="form-step"><span>05</span>Payment</h3>
+        <div class="pay-options" role="radiogroup" aria-label="Payment option">
+          <label class="pay-card"><input type="radio" name="paymentOption" value="deposit" checked><span><b>Reserve with <span class="dep-pct">25%</span></b><small>Balance due before collection</small></span></label>
+          <label class="pay-card"><input type="radio" name="paymentOption" value="full"><span><b>Pay in full</b><small>Nothing more to pay for the hire</small></span></label>
+        </div>
+
+        <p class="form-msg" role="alert"></p>
+        <button type="submit" class="btn btn-ink btn-block">Continue to secure payment</button>
+        <p class="fine"><svg class="i"><use href="#i-lock"/></svg> Card payments are processed by Stripe. We never see or store your card number. The refundable security deposit is taken separately, after verification.</p>
+      </form>
+
+      <aside class="panel summary" aria-live="polite">
+        <div class="summary-img"><img alt="" hidden></div>
+        <div class="summary-body">
+          <p class="eyebrow">Your quote</p>
+          <h3 class="summary-car">Select a vehicle</h3>
+          <dl>
+            <div><dt>Daily rate</dt><dd data-quote="rate">–</dd></div>
+            <div><dt>Hire length</dt><dd data-quote="days">–</dd></div>
+            <div class="saving" hidden><dt>Package saving</dt><dd data-quote="saving">–</dd></div>
+            <div class="fee" hidden><dt>Delivery / collection</dt><dd data-quote="fee">–</dd></div>
+            <div class="total"><dt>Total</dt><dd data-quote="total">–</dd></div>
+            <div class="due"><dt>Due today</dt><dd data-quote="due">–</dd></div>
+          </dl>
+          <p class="fine">Plus a refundable security deposit of £1,000 to £10,000, confirmed after verification. 100 miles a day included (£1 per extra mile).</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="requirements" class="section section-alt">
+    <div class="section-head">
+      <p class="eyebrow">Before you drive</p>
+      <h2>Requirements</h2>
+      <p class="muted">All documents must be clear, legible and up to date. Booked by phone or WhatsApp? <a href="verify.html">Complete your verification here</a>.</p>
+    </div>
+    <ul class="req-grid">
+      <li><svg class="i"><use href="#i-card"/></svg><h3>Licence &amp; NI number</h3><p>A clear photo of your driving licence (front and back) and your National Insurance number.</p></li>
+      <li><svg class="i"><use href="#i-doc"/></svg><h3>Proof of address</h3><ul><li>PDF bank statement from your online banking, dated within the last 2 months</li><li>A recent utility bill</li><li>One more, such as a letter from an official body</li></ul></li>
+      <li><svg class="i"><use href="#i-user"/></svg><h3>Driver questions</h3><p>Your age, how long you've held your licence, points, disqualifications, current insurance and any previous claims. Some answers need a quick call.</p></li>
+    </ul>
+  </section>
+
+  <section id="terms" class="section">
+    <div class="section-head">
+      <p class="eyebrow">Please read before booking</p>
+      <h2>Rental terms</h2>
+    </div>
+    <div class="terms-layout">
+      <div class="key-facts">
+        <div class="fact"><b>£1k – £10k</b><span>Security deposit, refunded 3 weeks after return once the car is clear of fines</span></div>
+        <div class="fact"><b>£2,000</b><span>Excess for any incident, plus £450 for loss of insurance</span></div>
+        <div class="fact"><b>100 miles / day</b><span>£1 per extra mile. Unlimited miles on request</span></div>
+        <div class="fact"><b>£40 each way</b><span>Delivery and collection fee</span></div>
+      </div>
+      <div>
+        <ul class="house-rules"><li>🚭 No smoking</li><li>🥤 No eating or drinking</li><li>🎈 No balloons</li></ul>
+        <ol class="terms-full" data-terms-list></ol>
+        <p class="muted" style="margin-top:18px">Administration fee of £50 for each letter received for any vehicle, in addition to the costs or fines in the letter. Report any incident immediately.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="enquiry" class="section section-alt">
+    <div class="enquiry-layout">
+      <div>
+        <p class="eyebrow">Shoots, events &amp; long-term hire</p>
+        <h2>Make an enquiry</h2>
+        <p class="muted">Planning a music video, wedding or a longer hire? Or interested in a car that's price on request? Tell us what you need and we'll get back to you quickly.</p>
+        <a class="wa-link" data-wa><svg class="i"><use href="#i-wa"/></svg> Prefer WhatsApp? Message us</a>
+      </div>
+      <form id="enquiry-form" class="panel form" novalidate>
+        <div class="grid-2">
+          <label>Enquiry type
+            <select name="topic">
+              <option>Self-drive hire</option>
+              <option>Music video / photo shoot</option>
+              <option>Wedding or event</option>
+              <option>Long-term hire</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label>Vehicle<select name="carId"></select></label>
+          <label>Name<input type="text" name="name" autocomplete="name" required></label>
+          <label>Date <small>(if known)</small><input type="date" name="date"></label>
+          <label>Phone<input type="tel" name="phone" autocomplete="tel" required></label>
+          <label>Email<input type="email" name="email" autocomplete="email" required></label>
+          <label class="full">Message<textarea name="message" rows="4" required></textarea></label>
+        </div>
+        <input type="text" name="company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="form-msg" role="alert"></p>
+        <button type="submit" class="btn btn-ink btn-block">Send enquiry</button>
+      </form>
+    </div>
+  </section>
+
+  <section id="contact" class="section">
+    <div class="section-head">
+      <p class="eyebrow">Get in touch</p>
+      <h2>Contact</h2>
+    </div>
+    <div class="contact-grid">
+      <a class="contact-card" data-tel><svg class="i"><use href="#i-phone"/></svg><span>Call</span><b data-text="phone"></b></a>
+      <a class="contact-card" data-wa><svg class="i"><use href="#i-wa"/></svg><span>WhatsApp</span><b>Message us</b></a>
+      <a class="contact-card" data-mail><svg class="i"><use href="#i-mail"/></svg><span>Email</span><b data-text="email"></b></a>
+      <div class="contact-card"><svg class="i"><use href="#i-pin"/></svg><span>Based in</span><b>London</b></div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <a href="#top" class="brand"><span class="brand-mark">BG LUX</span><span class="brand-text"><b>Luxury Cars</b><small>London</small></span></a>
+    <nav aria-label="Footer">
+      <a href="#fleet">Fleet</a><a href="#requirements">Requirements</a><a href="#terms">Terms</a><a href="verify.html">Verification</a><a href="#enquiry">Enquiry</a><a data-ig target="_blank" rel="noopener">Instagram</a>
+    </nav>
+    <p>&copy; <span id="year"></span> BG LUX Luxury Cars London. Drive in Style.</p>
+  </footer>
+
+  <a class="wa-float" data-wa aria-label="Chat on WhatsApp"><svg class="i"><use href="#i-wa"/></svg></a>
+
+  <div class="mobile-bar">
+    <a data-tel><svg class="i"><use href="#i-phone"/></svg>Call</a>
+    <a data-wa><svg class="i"><use href="#i-wa"/></svg>WhatsApp</a>
+    <a href="#book" class="mb-book">Book now</a>
+  </div>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-phone" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></symbol>
+    <symbol id="i-wa" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.2z"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></g></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></g></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></g></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></g></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.5"/><path d="M13 10h5M13 14h4"/></g></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></g></symbol>
+  </svg>
+
+  <script src="pricing.js"></script>
+  <script src="forms.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

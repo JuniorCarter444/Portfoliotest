@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Bookings Admin | BG LUX</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;1,6..96,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .admin { max-width: 1140px; margin: 0 auto; padding: 28px 16px 80px; }
+    .admin-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 28px; }
+    .admin h1 { font-size: 2.2rem; margin: 18px 0 0; }
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill { font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-hi); color: var(--muted); }
+    .pill.live { color: var(--ok); border-color: rgba(63, 107, 79, .4); }
+    .pill.warn { color: var(--accent); border-color: rgba(125, 99, 64, .4); }
+    .tabs { margin-bottom: 20px; }
+    .list { display: grid; gap: 16px; }
+    .bk { display: grid; grid-template-columns: 1.15fr .9fr 1.35fr; gap: 24px; }
+    .bk h3, .vf h3 { font: 500 1.35rem var(--display); margin: 0; }
+    .meta { color: var(--muted); font-size: .88rem; margin: 2px 0 10px; }
+    .admin a { text-decoration: none; }
+    .kvs { display: grid; grid-template-columns: auto 1fr; gap: 5px 14px; font-size: .9rem; margin: 0; }
+    .kvs dt { color: var(--muted); }
+    .kvs dd { margin: 0; text-align: right; font-weight: 600; }
+    .status { display: inline-block; font-family: var(--sans); font-size: .66rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: var(--panel-hi); color: var(--muted); margin-left: 8px; vertical-align: middle; }
+    .status.good { background: rgba(63, 107, 79, .12); color: var(--ok); }
+    .status.bad { background: rgba(160, 64, 44, .1); color: var(--error); }
+    .status.wait { background: rgba(125, 99, 64, .12); color: var(--accent); }
+    .acts { display: flex; flex-direction: column; gap: 10px; }
+    .acts h4 { margin: 6px 0 0; font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+    .row { display: flex; gap: 8px; }
+    .row input, .row select { min-height: 42px; padding: 8px 12px; }
+    .acts .btn { padding: 11px 16px; font-size: .66rem; }
+    .note { font-size: .82rem; color: var(--muted); margin: 0; }
+    .err { color: var(--error); font-size: .85rem; margin: 0; min-height: 1em; }
+    .empty { color: var(--muted); padding: 40px 0; text-align: center; }
+    .vf { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+    .answers { margin: 0; padding: 0; list-style: none; font-size: .86rem; }
+    .answers li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+    .answers li span { color: var(--muted); }
+    .answers li b.yes { color: var(--error); }
+    .docs { display: grid; gap: 8px; }
+    .docs a { display: flex; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid var(--line-hi); border-radius: 10px; color: var(--text); font-size: .86rem; font-weight: 600; background: #fff; }
+    .docs a:hover { border-color: var(--text); }
+    .docs a small { color: var(--faint); font-weight: 500; }
+    .flag { background: rgba(160, 64, 44, .07); border: 1px solid rgba(160, 64, 44, .3); color: var(--error); border-radius: 10px; padding: 10px 12px; font-size: .85rem; margin: 10px 0 0; }
+    @media (max-width: 900px) { .bk, .vf { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="admin">
+    <div class="admin-head">
+      <div>
+        <a href="/" class="brand"><span class="brand-mark">BG LUX</span><span class="brand-text"><b>Luxury Cars</b><small>London</small></span></a>
+        <h1>Admin</h1>
+      </div>
+      <div class="pills" id="pills"></div>
+    </div>
+    <div class="tabs filters" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="bookings">Bookings</button>
+      <button role="tab" aria-selected="false" data-tab="verifications">Verifications</button>
+      <button role="tab" aria-selected="false" data-tab="inquiries">Enquiries</button>
+    </div>
+    <div class="list" id="list"></div>
+  </main>
+
+  <script>
+    let data = { bookings: [], inquiries: [], verifications: [], questions: [], documents: [] };
+    let tab = 'bookings';
+    const $ = (s, r = document) => r.querySelector(s);
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const money = (n) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(n || 0);
+    const day = (iso) => (iso ? new Date(iso.length === 10 ? `${iso}T12:00:00Z` : iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
+    const when = (iso) => (iso ? new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '');
+    const verificationOf = (b) => data.verifications.find((v) => v.id === b.verificationId);
+
+    const DEPOSIT_LABEL = { requested: ['Requested', 'wait'], paid: ['Paid', 'good'], refunded: ['Refunded', 'good'], partly_refunded: ['Part refunded', 'wait'], retained: ['Retained', 'bad'] };
+
+    async function load() {
+      const res = await fetch('/api/admin/data');
+      data = await res.json();
+      $('#pills').innerHTML = `
+        <span class="pill ${data.paymentsLive ? 'live' : 'warn'}">${data.paymentsLive ? 'Stripe live' : 'Payments: demo mode'}</span>
+        <span class="pill ${data.emailLive ? 'live' : 'warn'}">${data.emailLive ? 'Email on' : 'Email: saved to outbox'}</span>`;
+      render();
+    }
+
+    function depositBlock(b) {
+      const d = b.securityDeposit;
+      const v = verificationOf(b);
+      if (b.status !== 'paid') return '<p class="note">Available once the booking is paid.</p>';
+      if (!v || v.status === 'awaiting_documents') return '<p class="note">Waiting for the customer to upload their documents. They were emailed a link.</p>';
+      if (!d || d.status === 'requested') {
+        return `
+          ${d ? `<p class="note"><span class="status wait">Requested ${money(d.amount)}</span> on ${day(d.requestedAt)}. Sending again updates the amount and re-emails the link.</p>` : '<p class="note">Review the verification, then request the deposit. The customer gets an email with the terms and a payment link.</p>'}
+          <div class="row"><input type="number" min="1" step="1" placeholder="£1,000 – £10,000" value="${d ? d.amount : ''}" data-f="amount"><button class="btn btn-ink" data-act="request">${d ? 'Resend' : 'Request'}</button></div>
+          ${d ? '<div class="row"><select data-f="method"><option>bank transfer</option><option>card terminal</option><option>cash</option></select><button class="btn btn-outline" data-act="markPaid">Mark paid</button></div>' : ''}`;
+      }
+      const [label, cls] = DEPOSIT_LABEL[d.status] || [d.status, ''];
+      const head = `<p class="note"><span class="status ${cls}">${label}</span> ${money(d.amount)} by ${esc(d.method)} on ${day(d.paidAt)}</p>`;
+      if (d.status === 'paid') {
+        const due = new Date(Date.parse(b.dropoffDate) + 21 * 86400000);
+        return `${head}
+          ${d.termsAcceptance ? `<p class="note">Terms accepted, signed "${esc(d.termsAcceptance.signature)}", ${when(d.termsAcceptance.acceptedAt)}</p>` : ''}
+          <p class="note">Refund due around ${day(due.toISOString())} (3 weeks after return).</p>
+          <div class="row"><input type="number" min="0" step="0.01" placeholder="Deduction £ (0 for full refund)" data-f="deduction"></div>
+          <div class="row"><input type="text" placeholder="Reason for deduction (emailed to customer)" data-f="reason"><button class="btn btn-outline" data-act="refund">Refund</button></div>`;
+      }
+      return `${head}<p class="note">Refunded ${money(d.refundAmount)} on ${day(d.refundedAt)}${d.deduction ? `. Kept ${money(d.deduction)}: ${esc(d.reason)}` : ''}${['card', 'demo'].includes(d.method) ? '' : ' (refund this yourself by bank transfer)'}</p>`;
+    }
+
+    function bookingCard(b) {
+      const balance = Math.max(0, (b.total || 0) - (b.amountPaid || 0));
+      const v = verificationOf(b);
+      const vStatus = !v ? '' : v.status === 'awaiting_documents' ? '<span class="status wait">Awaiting documents</span>' : `<span class="status ${v.flags.length ? 'bad' : 'good'}">${v.flags.length ? 'Call required' : 'Docs received'}</span>`;
+      return `
+        <article class="panel bk" data-id="${esc(b.id)}">
+          <div>
+            <h3>${esc(b.carName)}<span class="status ${b.status === 'paid' ? 'good' : 'wait'}">${b.status === 'paid' ? 'Paid' : 'Awaiting payment'}${b.demo ? ' (demo)' : ''}</span></h3>
+            <p class="meta">${esc(b.ref)} · ${day(b.pickupDate)}${b.pickupTime ? ` ${esc(b.pickupTime)}` : ''} → ${day(b.dropoffDate)} (${b.days} day${b.days === 1 ? '' : 's'})</p>
+            <p style="margin:0;font-weight:600">${esc(b.name)}</p>
+            <p class="meta"><a href="tel:${esc(b.phone)}">${esc(b.phone)}</a> · <a href="mailto:${esc(b.email)}">${esc(b.email)}</a></p>
+            ${b.delivery ? `<p class="note">${b.handover === 'collection' ? 'Collect from' : 'Deliver to'}: ${esc(b.delivery)}</p>` : ''}
+            ${b.notes ? `<p class="note">Notes: ${esc(b.notes)}</p>` : ''}
+            <p class="note" style="margin-top:8px">Verification ${vStatus} ${v && v.status !== 'awaiting_documents' ? `<a href="#" data-goto-v="${esc(v.id)}">View</a>` : ''}</p>
+          </div>
+          <dl class="kvs">
+            <dt>Hire</dt><dd>${money(b.hireTotal ?? b.total)}</dd>
+            ${b.handoverFee ? `<dt>Delivery/collection</dt><dd>${money(b.handoverFee)}</dd>` : ''}
+            <dt>Total</dt><dd>${money(b.total)}</dd>
+            <dt>Paid</dt><dd>${money(b.amountPaid)}</dd>
+            <dt>Balance</dt><dd style="color:${balance ? 'var(--accent)' : 'var(--ok)'}">${money(balance)}</dd>
+            <dt>Terms signed</dt><dd>${b.termsAcceptance ? esc(b.termsAcceptance.signature) : '–'}</dd>
+          </dl>
+          <div class="acts">
+            <h4>Security deposit</h4>
+            ${depositBlock(b)}
+            <h4>Balance</h4>
+            ${b.status === 'paid' && balance > 0 ? `<button class="btn btn-outline" data-act="balance">Charge saved card ${money(balance)}</button>` : `<p class="note">${balance ? 'Available once the booking is paid.' : 'Paid in full.'}</p>`}
+            ${b.status === 'paid' ? '<button class="btn btn-outline" data-act="resend">Resend confirmation email</button>' : ''}
+            <p class="err" role="alert"></p>
+          </div>
+        </article>`;
+    }
+
+    function verificationCard(v) {
+      const answer = (q) => {
+        const a = v.answers[q.id];
+        return `<li><span>${esc(q.label)}</span><b class="${q.callIfYes && a === 'yes' ? 'yes' : ''}">${esc(a === 'yes' ? 'Yes' : a === 'no' ? 'No' : a)}</b></li>`;
+      };
+      const docs = data.documents.map((d) => {
+        const f = v.documents[d.id];
+        return f ? `<a href="/api/admin/files/${esc(v.id)}/${esc(d.id)}" target="_blank" rel="noopener">${esc(d.short)}<small>${f.type === 'application/pdf' ? 'PDF' : 'Photo'} · ${(f.size / 1048576).toFixed(1)} MB</small></a>` : `<p class="note">${esc(d.short)}: not uploaded</p>`;
+      }).join('');
+      const t = v.termsAcceptance;
+      return `
+        <article class="panel vf" id="v-${esc(v.id)}" data-vid="${esc(v.id)}">
+          <div>
+            <h3>${esc(v.name)}<span class="status ${v.status === 'awaiting_documents' ? 'wait' : v.flags.length ? 'bad' : 'good'}">${v.status === 'awaiting_documents' ? 'Awaiting documents' : v.flags.length ? 'Call required' : 'Submitted'}</span></h3>
+            <p class="meta">${v.bookingRef ? esc(v.bookingRef) + ' · ' : ''}<a href="tel:${esc(v.phone)}">${esc(v.phone)}</a> · <a href="mailto:${esc(v.email)}">${esc(v.email)}</a></p>
+            ${v.flags.length ? `<p class="flag">Call to clarify: ${esc(v.flags.join('; '))}</p>` : ''}
+            <dl class="kvs" style="margin-top:14px">
+              <dt>NI number</dt><dd>${esc(v.niNumber || '–')}</dd>
+              <dt>Submitted</dt><dd>${when(v.submittedAt) || '–'}</dd>
+            </dl>
+            ${t ? `<p class="note" style="margin-top:12px">Terms v${esc(t.termsVersion)} accepted and signed "<b>${esc(t.signature)}</b>" on ${when(t.acceptedAt)} from ${esc(t.ip)}</p>` : ''}
+          </div>
+          <ul class="answers">${data.questions.map(answer).join('')}</ul>
+          <div class="acts">
+            <h4>Documents</h4>
+            <div class="docs">${v.documentsDeletedAt && !Object.keys(v.documents).length ? `<p class="note">Documents deleted on ${day(v.documentsDeletedAt)}.</p>` : docs}</div>
+            ${Object.keys(v.documents).length ? '<button class="btn btn-outline" data-vact="delete">Delete documents</button>' : ''}
+            <p class="err" role="alert"></p>
+          </div>
+        </article>`;
+    }
+
+    function enquiryCard(q) {
+      return `
+        <article class="panel">
+          <h3 style="font:500 1.2rem var(--display);margin:0">${esc(q.topic)}${q.carName ? ` · ${esc(q.carName)}` : ''}</h3>
+          <p class="meta">${esc(q.name)} · <a href="tel:${esc(q.phone)}">${esc(q.phone)}</a> · <a href="mailto:${esc(q.email)}">${esc(q.email)}</a> · received ${day(q.createdAt)}${q.date ? ` · for ${day(q.date)}` : ''}</p>
+          <p style="margin:8px 0 0;white-space:pre-wrap">${esc(q.message)}</p>
+        </article>`;
+    }
+
+    const RENDER = { bookings: bookingCard, verifications: verificationCard, inquiries: enquiryCard };
+    function render() {
+      const items = data[tab];
+      $('#list').innerHTML = items.length ? items.map(RENDER[tab]).join('') : `<p class="empty">Nothing here yet.</p>`;
+    }
+    function switchTab(name) {
+      tab = name;
+      document.querySelectorAll('.tabs button').forEach((x) => x.setAttribute('aria-selected', x.dataset.tab === name));
+      render();
+    }
+
+    const ENDPOINTS = { request: 'deposit/request', markPaid: 'deposit/mark-paid', refund: 'deposit/refund', balance: 'balance', resend: 'resend' };
+    const CONFIRM = {
+      request: (b, f) => `Email ${b.name} a request for a £${f.amount} security deposit?`,
+      markPaid: (b, f) => `Mark the £${b.securityDeposit.amount} deposit as paid by ${f.method}?`,
+      refund: (b, f) => {
+        const ded = Number(f.deduction) || 0;
+        return `Refund £${(b.securityDeposit.amount - ded).toFixed(2)}${ded ? ` and keep £${ded.toFixed(2)}` : ''}? ${b.securityDeposit.method === 'card' ? 'The refund goes back to their card.' : 'Record only: refund them yourself.'}`;
+      },
+      balance: (b) => `Charge ${b.name}'s saved card ${money(b.total - b.amountPaid)}?`,
+      resend: (b) => `Resend the confirmation email to ${b.email}?`
+    };
+
+    $('#list').addEventListener('click', async (e) => {
+      const goto = e.target.closest('[data-goto-v]');
+      if (goto) {
+        e.preventDefault();
+        switchTab('verifications');
+        document.getElementById(`v-${goto.dataset.gotoV}`)?.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+      const vbtn = e.target.closest('[data-vact]');
+      if (vbtn) {
+        const card = vbtn.closest('[data-vid]');
+        if (!confirm('Permanently delete these documents? This cannot be undone.')) return;
+        const res = await fetch(`/api/admin/verifications/${card.dataset.vid}/delete-documents`, { method: 'POST' });
+        const out = await res.json();
+        if (!res.ok) return (card.querySelector('.err').textContent = out.error);
+        Object.assign(data.verifications.find((v) => v.id === card.dataset.vid), out.verification);
+        render();
+        return;
+      }
+      const btn = e.target.closest('[data-act]');
+      if (!btn) return;
+      const card = btn.closest('[data-id]');
+      const b = data.bookings.find((x) => x.id === card.dataset.id);
+      const f = Object.fromEntries([...card.querySelectorAll('[data-f]')].map((i) => [i.dataset.f, i.value.trim()]));
+      const act = btn.dataset.act;
+      if (!confirm(CONFIRM[act](b, f))) return;
+      btn.disabled = true;
+      const res = await fetch(`/api/admin/bookings/${b.id}/${ENDPOINTS[act]}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(f) });
+      const out = await res.json().catch(() => ({ error: 'Request failed' }));
+      btn.disabled = false;
+      if (!res.ok) {
+        card.querySelector('.err').textContent = out.error;
+        return;
+      }
+      Object.assign(b, out.booking);
+      card.outerHTML = bookingCard(b);
+    });
+
+    document.querySelector('.tabs').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (btn) switchTab(btn.dataset.tab);
+    });
+
+    load();
+  </script>
+</body>
+</html>
